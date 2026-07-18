@@ -234,7 +234,7 @@
           const pnlScore=p>0?1:p<0?-1:0;const tier=DISCIPLINE_TIER[e.discipline];let dayScore=pnlScore;
           if(tier){dayScore=tier==="green"?1:tier==="red"?-1:-0.4;
             b.insertAdjacentHTML("beforeend",`<span class="discipline ${tier}" title="${e.discipline}">${tier==="green"?"✓":tier==="orange"?"●":"✕"}</span>`)}
-          dayScores.push(dayScore);
+          dayScores.push({score:dayScore,weight:Math.abs(p)});
           b.querySelector(".day-content").innerHTML=`<div class="pnl">${money(p)}</div><div class="day-meta">${t} ${t===1?"trade":"trades"}<br>${wr.toFixed(1)}%</div>`;
           mp+=p;md++;mt+=t;mw+=w;weeks[wi].pnl+=p;weeks[wi].days++;weeks[wi].trades+=t;weeks[wi].wins+=w;if(e.discipline)weeks[wi].discipline.push(e.discipline)}
         b.addEventListener("click",()=>openDialog(k));$("calendarGrid").appendChild(b)}
@@ -242,11 +242,14 @@
       $("weekColumn").style.setProperty("--wk-rows",weeks.length);
       let wkRunning=currentMonthlyStart;const weekStarts=weeks.map((w,i)=>{const key=`${y}-${m}-${i}`;const s=weeklyOverrides[key]!==undefined?weeklyOverrides[key]:wkRunning;wkRunning=s+w.pnl;return s});
       $("weekColumn").innerHTML="";weeks.forEach((w,i)=>{const pct=w.days&&weekStarts[i]?w.pnl/weekStarts[i]*100:null;$("weekColumn").insertAdjacentHTML("beforeend",`<div class="week-card"><div class="week-label">WEEK ${i+1}</div><div class="week-total ${w.pnl>0?"positive":w.pnl<0?"negative":""}">${money(w.pnl)}</div>${pct!==null?`<div class="week-pct ${pct>0?"positive":pct<0?"negative":""}">${pct.toFixed(1)}%</div>`:""}<div class="week-days">${w.days} ${w.days===1?"day":"days"}</div></div>`)});
-      $("yearPill").textContent=y;const recentScores=dayScores.slice(-5);renderTilt(recentScores.reduce((a,b)=>a+b,0),recentScores.length);
+      $("yearPill").textContent=y;const recentScores=dayScores.slice(-5);
+      const totalWeight=recentScores.reduce((s,d)=>s+d.weight,0);
+      const weightedTilt=totalWeight>0?recentScores.reduce((s,d)=>s+d.score*d.weight,0)/totalWeight:0;
+      renderTilt(weightedTilt,recentScores.length);
       renderDashboard(mp,mt,mw,weeks,y,m);renderWeeklyRows(weeks,y,m,first,dim,weekStarts);renderEquityChart();renderPnlBars();
     }
-    function renderTilt(scoreSum,count){
-      const greenPct=count?Math.max(0,Math.min(100,50+(scoreSum/count)*50)):50;
+    function renderTilt(weightedAvg,count){
+      const greenPct=count?Math.max(0,Math.min(100,50+weightedAvg*50)):50;
       const redPct=100-greenPct;
       $("tiltTrack").style.gridTemplateColumns=`${redPct}% ${greenPct}%`;
       let status;
