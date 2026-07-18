@@ -269,7 +269,7 @@
     }
     let currentWeeklyKey=null;
     function renderDashboard(monthPnl,trades,wins,weeks,y,m){
-      const all=allEntries(),gross=all.reduce((s,[,e])=>s+Number(e.pnl||0),0),current=SETTINGS.monthlyStart+gross-SETTINGS.withdrawals;
+      const current=SETTINGS.monthlyStart+monthPnl-SETTINGS.withdrawals;
       const winrate=trades?wins/trades*100:0;const monthPct=SETTINGS.monthlyStart?monthPnl/SETTINGS.monthlyStart*100:0;
       let activeWeekIdx=-1;for(let i=weeks.length-1;i>=0;i--){if(weeks[i].days>0){activeWeekIdx=i;break}}
       const activeWeek=activeWeekIdx>=0?weeks[activeWeekIdx]:null;
@@ -277,10 +277,10 @@
       let weeklyStart=activeWeek?current-activeWeek.pnl:SETTINGS.monthlyStart;
       if(weeklyOverrides[currentWeeklyKey]!==undefined)weeklyStart=weeklyOverrides[currentWeeklyKey];
       $("monthlyStart").textContent=money(SETTINGS.monthlyStart);$("weeklyStart").textContent=money(weeklyStart);$("currentBalance").textContent=money(current);
-      $("todayTarget").textContent=money(current*(1+SETTINGS.dailyTargetPct));$("dailyProfit").textContent=money(current*SETTINGS.dailyTargetPct);$("grossPnl").textContent=money(gross);
+      $("todayTarget").textContent=money(current*(1+SETTINGS.dailyTargetPct));$("dailyProfit").textContent=money(current*SETTINGS.dailyTargetPct);$("grossPnl").textContent=money(monthPnl);
       $("stopTarget").textContent=money(current*(1-SETTINGS.stopPct));$("monthlyWinrate").textContent=`${winrate.toFixed(2)}%`;$("monthlyPercentage").textContent=`${monthPct.toFixed(2)}%`;
       $("monthlyTarget").textContent=money(SETTINGS.monthlyStart*SETTINGS.monthlyTargetMultiplier);$("withdrawWages").textContent=money(monthPnl*SETTINGS.withdrawPct);
-      $("fromTo").textContent=`${money(SETTINGS.monthlyStart)} → ${money(current)}`;$("summaryPnl").textContent=money(gross);
+      $("fromTo").textContent=`${money(SETTINGS.monthlyStart)} → ${money(current)}`;$("summaryPnl").textContent=money(monthPnl);
     }
     function renderWeeklyRows(weeks,y,m,first,dim,weekStarts){
       $("weeklyRows").innerHTML="";
