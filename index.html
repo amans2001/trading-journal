@@ -232,7 +232,7 @@
         b.dataset.date=k;b.innerHTML=`<span class="day-number">${d}</span><div class="day-content"></div>`;
         if(e){const p=Number(e.pnl||0),t=Number(e.trades||0),w=Number(e.wins||0),wr=t?w/t*100:0;b.classList.add(p>0?"profit":p<0?"loss":"breakeven");
           const pnlScore=p>0?1:p<0?-1:0;const tier=DISCIPLINE_TIER[e.discipline];let dayScore=pnlScore;
-          if(tier){const dScore=tier==="green"?1:tier==="red"?-1:-0.4;dayScore=(pnlScore+dScore)/2;
+          if(tier){dayScore=tier==="green"?1:tier==="red"?-1:-0.4;
             b.insertAdjacentHTML("beforeend",`<span class="discipline ${tier}" title="${e.discipline}">${tier==="green"?"✓":tier==="orange"?"●":"✕"}</span>`)}
           tiltScoreSum+=dayScore;tiltScoreCount++;
           b.querySelector(".day-content").innerHTML=`<div class="pnl">${money(p)}</div><div class="day-meta">${t} ${t===1?"trade":"trades"}<br>${wr.toFixed(1)}%</div>`;
