@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Trading Journal — UI Review V5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#02080d;--panel:#07131d;--panel2:#091925;--card:#0a1722;--border:#213847;
+      --text:#f5f8fb;--muted:#92aabc;--cyan:#00eaff;--purple:#a855f7;--green:#39e67c;
+      --red:#ff4967;--gold:#ffd21e;--blue:#34c9ff;--shadow:0 18px 60px rgba(0,0,0,.38);
+      --green-bg:rgba(24,202,100,.16);--red-bg:rgba(255,50,83,.15);--blue-bg:rgba(41,160,255,.14)
+    }
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;background:
+      radial-gradient(circle at 10% 0%,rgba(120,40,210,.12),transparent 28%),
+      radial-gradient(circle at 92% 8%,rgba(0,234,255,.08),transparent 28%),var(--bg);
+      color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+    button,input,select,textarea{font:inherit}.app{width:min(1680px,calc(100% - 24px));margin:12px auto 40px}
+    .top-grid{display:grid;grid-template-columns:150px repeat(9,minmax(125px,1fr));gap:8px;margin-bottom:10px}
+    .brand,.metric-card,.panel{background:linear-gradient(155deg,#0b1823,#07111a);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;min-width:0}
+    .brand{padding:13px 12px;display:flex;flex-direction:column;justify-content:center}.brand strong{font-size:19px}.brand span{font-size:25px;color:var(--purple);font-weight:900}.year-pill{margin-top:8px;width:max-content;padding:5px 15px;border:1px solid var(--purple);border-radius:999px;color:#d49cff;font-weight:800}
+    .metric-card{padding:12px;min-height:116px;position:relative;overflow:hidden;display:flex;flex-direction:column}.metric-card::after{content:"";position:absolute;inset:auto 0 0;height:3px;background:currentColor;opacity:.45}
+    .metric-card .value{margin-top:auto;padding-top:10px}
+    .metric-card .icon{font-size:18px;opacity:.9}.metric-card .label{margin-top:8px;font-size:11.5px;font-weight:600;line-height:1.35;letter-spacing:.2px}.metric-card .value{font-size:25px;font-weight:700;letter-spacing:-.2px}
+    .update-btn{position:absolute;top:11px;right:11px;padding:3px 10px;border:1px solid var(--cyan);color:var(--cyan);background:rgba(0,234,255,.08);border-radius:999px;font-size:10px;font-weight:700;cursor:pointer}
+    .update-btn:hover{background:rgba(0,234,255,.2)}
+    .manual-tag{font-size:9px;font-weight:500;opacity:.65;letter-spacing:.1px}
+    .cyan{color:var(--cyan)}.purple{color:var(--purple)}.green{color:var(--green)}.red{color:var(--red)}.gold{color:var(--gold)}.white{color:var(--text)}
+    .main-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(420px,1fr);gap:10px;align-items:stretch}
+    .left-stack,.right-stack{gap:10px;min-height:0}.left-stack{display:flex;flex-direction:column}.right-stack{display:grid;align-content:start}.calendar-panel{padding:12px;flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
+    .calendar-toolbar{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;margin-bottom:10px;flex:0 0 auto}
+    .month-control{display:flex;gap:8px;align-items:center}.btn,.icon-btn{border:1px solid var(--border);background:#07131d;color:var(--text);border-radius:10px;cursor:pointer}
+    .icon-btn{width:38px;height:38px;font-size:21px}.btn{padding:9px 14px;font-weight:800}.btn:hover,.icon-btn:hover{border-color:var(--cyan)}
+    .month-label{min-width:145px;padding:9px 14px;border:1px solid var(--border);border-radius:10px;text-align:center;font-weight:900;background:#07131d}
+    .calendar-title{text-align:center;font-weight:900;color:var(--purple);padding:0 12px}.month-stats{justify-self:end;display:flex;gap:7px;align-items:center;flex-wrap:wrap;justify-content:flex-end;font-size:12px;color:var(--muted);font-weight:800}
+    .chip{padding:5px 10px;border-radius:999px;background:#102334;border:1px solid rgba(100,130,150,.28);color:var(--text)}
+    .calendar-layout{display:grid;grid-template-columns:minmax(0,1fr) 112px;gap:8px;flex:1 1 auto;min-height:0}.calendar-block{display:flex;flex-direction:column;min-height:0}.weekday-row,.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+    .weekday{padding:8px 2px;text-align:center;border:1px solid var(--border);border-radius:9px;background:#07121b;font-size:11px;font-weight:900}
+    .calendar-grid{margin-top:5px}.day-card{position:relative;min-height:94px;padding:7px;border:1px solid var(--border);border-radius:11px;background:linear-gradient(145deg,#0c1720,#09131c);color:var(--text);cursor:pointer;transition:.16s;overflow:hidden}
+    .day-card:hover{transform:translateY(-2px);border-color:var(--cyan)}.day-card.empty{opacity:.16;cursor:default}.day-card.empty:hover{transform:none;border-color:var(--border)}
+    .day-card.profit{background:linear-gradient(145deg,rgba(8,78,47,.82),var(--green-bg));border-color:rgba(57,230,124,.6)}
+    .day-card.loss{background:linear-gradient(145deg,rgba(83,11,28,.82),var(--red-bg));border-color:rgba(255,73,103,.62)}
+    .day-card.breakeven{background:linear-gradient(145deg,rgba(8,50,75,.82),var(--blue-bg));border-color:rgba(52,201,255,.55)}
+    .day-number{position:absolute;right:8px;top:7px;z-index:3;font-size:12px;font-weight:600;color:rgba(245,248,251,.8);text-shadow:0 1px 3px rgba(0,0,0,.8);opacity:1}.discipline{position:absolute;left:7px;top:6px;width:18px;height:18px;display:grid;place-items:center;border:1px solid currentColor;border-radius:5px;font-size:9px}.discipline.green{color:#39e67c}.discipline.orange{color:#ff9d3d}.discipline.red{color:#ff4967}
+    .day-content{height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-top:10px;gap:6px}.pnl{font-size:18px;font-weight:800}.profit .pnl{color:var(--green)}.loss .pnl{color:var(--red)}.breakeven .pnl{color:var(--blue)}.day-meta{font-size:10px;font-weight:500;line-height:1.6;color:#c3d2dd;opacity:.85}
+    .week-col{display:grid;grid-template-rows:repeat(var(--wk-rows,5),1fr);gap:8px;padding-top:33px}.week-card{min-height:100px;border:1px solid var(--border);border-radius:11px;background:#0a1620;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
+    .week-label{font-size:10px;color:#87b6d7;font-weight:700;letter-spacing:.4px}.week-total{font-size:22px;font-weight:800}.week-pct{font-size:11px;font-weight:700;color:#8ba3b4}.week-pct.positive{color:var(--green)}.week-pct.negative{color:var(--red)}.week-days{padding:4px 11px;border-radius:999px;background:#132437;font-size:10px;font-weight:500;color:#c7d6df}
+    .tilt{padding:12px}.section-title{
+      display:flex;
+      align-items:center;
+      min-height:30px;
+      width:auto;
+      padding:0 16px;
+      margin:-12px -12px 12px;
+      background:#25113d;
+      color:var(--purple);
+      font-size:12px;
+      font-weight:900;
+      line-height:1;
+      letter-spacing:.1px;
+      border-radius:13px 13px 0 0;
+      overflow:hidden;
+      white-space:nowrap
+    }
+    .tilt-top{display:flex;justify-content:space-between;align-items:center}.reset{padding:9px 13px;border:1px solid var(--cyan);color:var(--cyan);background:transparent;border-radius:10px;font-weight:900;cursor:pointer}.tilt-label{font-weight:900}
+    .data-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.mini-btn{padding:7px 11px;border:1px solid rgba(120,150,175,.3);color:#a9c1d1;background:#07131d;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}.mini-btn:hover{border-color:var(--cyan);color:var(--cyan)}.mini-btn.connected{border-color:var(--green);color:var(--green)}
+    .tilt-track{height:24px;margin:10px 0 5px;border-radius:7px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;background:#15202b;transition:grid-template-columns .35s ease}.tilt-red{background:linear-gradient(90deg,#ff365d,#ff4967)}.tilt-green{background:linear-gradient(90deg,#3ed9a0,#39e67c)}.tilt-status{text-align:center;font-weight:900}
+    .summary-grid{display:grid;grid-template-columns:1fr 1.15fr .85fr;min-width:0;overflow:hidden}.summary-box{min-width:0;min-height:108px;padding:17px;text-align:center;border-right:1px solid rgba(70,90,110,.25);display:flex;flex-direction:column;justify-content:center;overflow:hidden}.summary-box:last-child{border-right:0}.summary-label{font-size:12px;font-weight:900}.summary-value{font-size:26px;font-weight:900;margin-top:8px}.summary-box.highlight{background:#241c08;border-color:rgba(255,210,30,.25)}.summary-foot{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(70,90,110,.25)}.summary-foot>div{padding:14px;text-align:center}.summary-foot small{display:block;color:var(--cyan);font-weight:900}.summary-foot strong{display:block;margin-top:7px}
+    
+    .performance-panel{padding:12px}
+
+    .graph-panel{min-height:290px;padding:12px;overflow:hidden}.graph-wrap{height:230px;border-radius:12px;background:linear-gradient(180deg,rgba(15,34,49,.45),rgba(5,13,20,.25));border:1px solid rgba(80,110,130,.18);padding:14px 10px 6px}.graph-wrap svg{width:100%;height:100%;display:block;overflow:visible}.graph-empty{height:100%;display:flex;align-items:center;justify-content:center;color:var(--muted);text-align:center;padding:20px}
+    .chart-grid line{stroke:rgba(120,150,175,.14)}.chart-axis text{fill:#7f9cb0;font-size:9px;font-weight:600}.equity-line{fill:none;stroke:var(--cyan);stroke-width:2.5px}.equity-area{opacity:.18}.equity-dot{fill:var(--cyan);stroke:#04121c;stroke-width:1.5px}.pnl-bar.profit{fill:var(--green)}.pnl-bar.loss{fill:var(--red)}.pnl-baseline{stroke:rgba(140,170,195,.35);stroke-width:1px}
+    .journal-table{overflow:hidden;flex:0 1 auto;min-height:205px;display:flex;flex-direction:column}.table-head,.week-row{display:grid;grid-template-columns:90px 1.45fr 72px 88px 84px 1.6fr;align-items:center;column-gap:8px}.table-head{height:32px;padding:0 12px;background:#061018;color:#dfe9ef;font-size:10px;font-weight:900;flex:0 0 auto}.week-row{height:30px;min-height:30px;padding:0 12px;border-top:1px solid rgba(70,95,115,.22);font-size:10.5px;line-height:1.1}.journal-table #weeklyRows{flex:0 0 auto;display:grid;grid-template-rows:repeat(var(--table-rows,5),30px)}.week-row .weekname{color:var(--cyan);font-weight:900}.positive{color:var(--green)}.negative{color:var(--red)}
+    dialog{width:min(520px,calc(100% - 28px));border:1px solid #2b4659;border-radius:20px;color:var(--text);background:#07131d;box-shadow:0 24px 90px rgba(0,0,0,.65);padding:0}dialog::backdrop{background:rgba(0,5,9,.78);backdrop-filter:blur(5px)}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #203645}.modal-header h2{margin:0;font-size:19px}.close{width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:#0a1a25;color:white;cursor:pointer}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:18px 20px}.field.full{grid-column:1/-1}label{display:block;margin-bottom:6px;color:#b9cad6;font-size:12px;font-weight:800}
+    input,select,textarea{width:100%;border:1px solid #294254;border-radius:11px;background:#0a1924;color:white;padding:11px 12px;outline:none}textarea{min-height:90px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--cyan)}
+    .modal-actions{display:flex;justify-content:space-between;gap:10px;padding:0 20px 20px}.actions-right{display:flex;gap:10px}.save,.delete{padding:10px 17px;border-radius:11px;font-weight:900;cursor:pointer}.save{border:1px solid var(--cyan);background:var(--cyan);color:#001116}.delete{border:1px solid rgba(255,73,103,.45);background:rgba(255,73,103,.08);color:var(--red)}
+    @media(max-width:1250px){.top-grid{grid-template-columns:repeat(5,1fr)}.brand{grid-row:span 2}.main-grid{grid-template-columns:1fr}.left-stack{display:grid}.journal-table{min-height:205px}.right-stack{grid-template-columns:1fr 1fr}.graph-panel{grid-column:1/-1}}
+    @media(max-width:850px){.top-grid{grid-template-columns:repeat(2,1fr)}.brand{grid-row:auto}.calendar-toolbar{grid-template-columns:1fr}.calendar-title{grid-row:1}.month-control,.month-stats{justify-self:center}.calendar-layout{grid-template-columns:1fr}.week-col{grid-column:1;grid-row:auto;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;row-gap:8px;padding-top:0}.right-stack{grid-template-columns:1fr}.graph-panel{grid-column:auto}.table-head,.week-row{grid-template-columns:80px 1.4fr 60px 80px}.table-head>*:nth-child(n+5),.week-row>*:nth-child(n+5){display:none}}
+    @media(max-width:600px){.app{width:calc(100% - 10px);margin-top:5px}.top-grid{grid-template-columns:1fr 1fr}.metric-card{min-height:100px}.calendar-panel{padding:7px}.weekday-row,.calendar-grid{gap:2px}.weekday{font-size:9px}.day-card{min-height:74px;padding:4px;border-radius:8px}.day-content{height:65px}.pnl{font-size:11px}.day-meta{font-size:8px}.week-col{grid-template-columns:repeat(2,1fr)}.summary-grid{grid-template-columns:1fr}.summary-box{border-right:0;border-bottom:1px solid rgba(70,90,110,.25)}.side-summary{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="top-grid">
+      <div class="brand"><strong>DAILY TRADING</strong><span>JOURNAL</span><div class="year-pill" id="yearPill">2026</div></div>
+      <div class="metric-card cyan"><div class="icon">$</div><button class="update-btn" id="updateMonthly" type="button">Update</button><div class="label">MONTHLY <span class="manual-tag">(MANUAL)</span><br>START BALANCE</div><div class="value white" id="monthlyStart">$47.91</div></div>
+      <div class="metric-card cyan"><div class="icon">♟</div><button class="update-btn" id="updateWeekly" type="button">Update</button><div class="label">WEEKLY <span class="manual-tag">(MANUAL)</span><br>START BALANCE</div><div class="value white" id="weeklyStart">$47.91</div></div>
+      <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE</div><div class="value" id="currentBalance">$47.91</div></div>
+      <div class="metric-card purple"><div class="icon">▣</div><div class="label"><span class="purple">TARGET</span> <span class="white">FOR TODAY</span></div><div class="value purple" id="todayTarget">$50.31</div></div>
+      <div class="metric-card green"><div class="icon">⊕</div><div class="label">DAILY PROFITS</div><div class="value white" id="dailyProfit">$0.00</div></div>
+      <div class="metric-card white"><div class="icon">♟</div><div class="label">GROSS P&amp;L</div><div class="value" id="grossPnl">$0.00</div></div>
+      <div class="metric-card red"><div class="icon">⛨</div><div class="label">STOP TARGET</div><div class="value" id="stopTarget">$42.64</div></div>
+      <div class="metric-card cyan"><div class="icon">⌂</div><div class="label">MONTHLY WINRATE</div><div class="value" id="monthlyWinrate">0.00%</div></div>
+      <div class="metric-card gold"><div class="icon">◐</div><div class="label">MONTHLY PERCENTAGE</div><div class="value" id="monthlyPercentage">0.00%</div></div>
+    </section>
+
+    <section class="main-grid">
+      <div class="left-stack">
+        <section class="panel calendar-panel">
+          <div class="calendar-toolbar">
+            <div class="month-control">
+              <button class="icon-btn" id="prevMonth" type="button">‹</button>
+              <div class="month-label" id="monthLabel">July 2026</div>
+              <button class="icon-btn" id="nextMonth" type="button">›</button>
+              <button class="btn" id="thisMonth" type="button">This month</button>
+            </div>
+            <div class="calendar-title">MONTHLY TRADING CALENDAR</div>
+            <div class="month-stats"><span>Monthly stats:</span><span class="chip" id="monthPnl">$0</span><span class="chip" id="monthDays">0 days</span></div>
+          </div>
+          <div class="calendar-layout" id="calendarLayout">
+            <div class="calendar-block">
+              <div class="weekday-row"><div class="weekday">Sun</div><div class="weekday">Mon</div><div class="weekday">Tue</div><div class="weekday">Wed</div><div class="weekday">Thu</div><div class="weekday">Fri</div><div class="weekday">Sat</div></div>
+              <div class="calendar-grid" id="calendarGrid"></div>
+            </div>
+            <aside class="week-col" id="weekColumn"></aside>
+          </div>
+        </section>
+
+        <section class="panel journal-table">
+          <div class="table-head"><div>WEEK</div><div>DATE</div><div>TRADES</div><div>P&amp;L</div><div>WEEKLY %</div><div>DISCIPLINE CHECK</div></div>
+          <div id="weeklyRows"></div>
+        </section>
+      </div>
+
+      <div class="right-stack">
+        <section class="panel tilt">
+          <div class="tilt-top"><button class="reset" id="resetMonth" type="button">↻ RESET MONTH</button><div class="tilt-label">TILT METER</div></div>
+          <div class="tilt-track" id="tiltTrack"><div class="tilt-red"></div><div class="tilt-green"></div></div>
+          <div class="tilt-status" id="tiltStatus">🟡 STABLE</div>
+          <div class="data-actions">
+            <button class="mini-btn" id="exportBtn" type="button" title="Download a backup file of all your data">⬇ Backup file</button>
+            <button class="mini-btn" id="importBtn" type="button" title="Restore your data from a backup file">⬆ Restore file</button>
+            <button class="mini-btn" id="sheetBtn" type="button" title="Connect a Google Sheet as an automatic backup">☁ <span id="sheetBtnLabel">Connect Google Sheet</span></button>
+            <input type="file" id="importFile" accept="application/json" style="display:none">
+          </div>
+        </section>
+
+        <section class="panel performance-panel">
+          <div class="section-title">PERFORMANCE SUMMARY</div>
+          <div class="summary-grid">
+            <div class="summary-box"><div class="summary-label cyan">WEEKLY GOAL</div><div class="summary-value cyan">15%</div></div>
+            <div class="summary-box highlight"><div class="summary-label gold">MONTHLY TARGET</div><div class="summary-value gold" id="monthlyTarget">$76.66</div></div>
+            <div class="summary-box"><div class="summary-label green">WITHDRAW WAGES</div><div class="summary-value green" id="withdrawWages">$0.00</div></div>
+          </div>
+          <div class="summary-foot">
+            <div><small>FROM → TO</small><strong id="fromTo">$47.91 → $47.91</strong></div>
+            <div><small>TOTAL P&amp;L</small><strong id="summaryPnl">$0.00</strong></div>
+          </div>
+        </section>
+
+        <section class="panel graph-panel">
+          <div class="section-title">↗ ACCOUNT BALANCE PROGRESSION</div>
+          <div class="graph-wrap" id="equityWrap"></div>
+        </section>
+
+        <section class="panel graph-panel" style="margin-top:12px">
+          <div class="section-title">▥ DAILY P&amp;L</div>
+          <div class="graph-wrap" id="barsWrap"></div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="entryDialog">
+    <div class="modal-header"><h2 id="dialogTitle">Add trading day</h2><button class="close" id="closeDialog" type="button">✕</button></div>
+    <div class="form-grid">
+      <div class="field full"><label for="entryDate">Date</label><input id="entryDate" type="date" readonly></div>
+      <div class="field"><label for="entryPnl">Daily P&amp;L ($)</label><input id="entryPnl" type="number" step="0.01" placeholder="e.g. 6.23"></div>
+      <div class="field"><label for="entryTrades">Number of trades</label><input id="entryTrades" type="number" min="0" step="1" placeholder="e.g. 2"></div>
+      <div class="field"><label for="entryWins">Winning trades</label><input id="entryWins" type="number" min="0" step="1" placeholder="e.g. 1"></div>
+      <div class="field"><label for="entryDiscipline">Discipline</label><select id="entryDiscipline"><option value="">Not recorded</option><option value="Perfect Day" style="color:#39e67c">Perfect Day</option><option value="Stopped After 2 Trades" style="color:#39e67c">Stopped After 2 Trades</option><option value="Accepted the Loss" style="color:#39e67c">Accepted the Loss</option><option value="Missed Setup" style="color:#ff9d3d">Missed Setup</option><option value="Early Exit" style="color:#ff9d3d">Early Exit</option><option value="Forced Trade" style="color:#ff9d3d">Forced Trade</option><option value="Overtraded" style="color:#ff9d3d">Overtraded</option><option value="Revenge Trading" style="color:#ff4967">Revenge Trading</option><option value="Broke Risk Rules" style="color:#ff4967">Broke Risk Rules</option></select></div>
+      <div class="field full"><label for="entryNotes">Notes</label><textarea id="entryNotes" placeholder="Optional session note"></textarea></div>
+    </div>
+    <div class="modal-actions"><button class="delete" id="deleteEntry" type="button">Delete</button><div class="actions-right"><button class="btn" id="cancelDialog" type="button">Cancel</button><button class="save" id="saveEntry" type="button">Save day</button></div></div>
+  </dialog>
+
+  <script>
+    const STORAGE_KEY="amanJournalIntegratedV1";
+    const DEFAULT_SETTINGS={monthlyStart:47.91,dailyTargetPct:0.05,stopPct:0.12,withdrawPct:0.12,monthlyTargetMultiplier:1.60,withdrawals:0,wallet:0};
+    const demo={};
+    const DISCIPLINE_TIER={"Perfect Day":"green","Stopped After 2 Trades":"green","Accepted the Loss":"green","Missed Setup":"orange","Early Exit":"orange","Forced Trade":"orange","Overtraded":"orange","Revenge Trading":"red","Broke Risk Rules":"red"};
+    let SETTINGS={...DEFAULT_SETTINGS};let weeklyOverrides={};
+    let entries=load();let currentMonth=new Date(2026,6,1);let selected=null;
+    const $=id=>document.getElementById(id);
+    function load(){try{const x=localStorage.getItem(STORAGE_KEY);if(!x)return {...demo};const parsed=JSON.parse(x);
+        if(parsed&&parsed.entries){SETTINGS={...DEFAULT_SETTINGS,...(parsed.settings||{})};
+          if(parsed.weeklyOverrides)weeklyOverrides=parsed.weeklyOverrides;
+          else if(parsed.weeklyOverride)weeklyOverrides={[parsed.weeklyOverride.weekKey]:parsed.weeklyOverride.value};
+          return parsed.entries}
+        return parsed}catch{return {...demo}}}
+    function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify({entries,settings:SETTINGS,weeklyOverrides}));if(typeof syncToSheet==="function")syncToSheet(false)}
+    function key(y,m,d){return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
+    function money(v){const a=Math.abs(v);const f=a>=1000?`$${(a/1000).toFixed(a%1000===0?0:2)}K`:`$${a.toFixed(2).replace(/\.00$/,"")}`;return v<0?`-${f}`:f}
+    function monthEntries(){const p=`${currentMonth.getFullYear()}-${String(currentMonth.getMonth()+1).padStart(2,"0")}`;return Object.entries(entries).filter(([d])=>d.startsWith(p)).sort((a,b)=>a[0].localeCompare(b[0]))}
+    function allEntries(){return Object.entries(entries).sort((a,b)=>a[0].localeCompare(b[0]))}
+    function render(){
+      const y=currentMonth.getFullYear(),m=currentMonth.getMonth(),first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),cells=Math.ceil((first+dim)/7)*7,rowCount=cells/7;
+      $("monthLabel").textContent=currentMonth.toLocaleDateString("en-NZ",{month:"long",year:"numeric"});
+      $("calendarGrid").innerHTML="";const weeks=Array.from({length:rowCount},()=>({pnl:0,days:0,trades:0,wins:0,discipline:[]}));
+      let mp=0,md=0,mt=0,mw=0,tiltScoreSum=0,tiltScoreCount=0;
+      for(let i=0;i<cells;i++){const b=document.createElement("button");b.type="button";b.className="day-card";const d=i-first+1,visible=d>=1&&d<=dim;
+        if(!visible){b.classList.add("empty");b.disabled=true;$("calendarGrid").appendChild(b);continue}
+        const k=key(y,m,d),e=entries[k];
+        const firstWeekEnd = 7 - first;
+        let wi;
+        if(d <= firstWeekEnd) wi = 0;
+        else wi = 1 + Math.floor((d - firstWeekEnd - 1) / 7);
+        b.dataset.date=k;b.innerHTML=`<span class="day-number">${d}</span><div class="day-content"></div>`;
+        if(e){const p=Number(e.pnl||0),t=Number(e.trades||0),w=Number(e.wins||0),wr=t?w/t*100:0;b.classList.add(p>0?"profit":p<0?"loss":"breakeven");
+          const pnlScore=p>0?1:p<0?-1:0;const tier=DISCIPLINE_TIER[e.discipline];let dayScore=pnlScore;
+          if(tier){const dScore=tier==="green"?1:tier==="red"?-1:-0.4;dayScore=(pnlScore+dScore)/2;
+            b.insertAdjacentHTML("beforeend",`<span class="discipline ${tier}" title="${e.discipline}">${tier==="green"?"✓":tier==="orange"?"●":"✕"}</span>`)}
+          tiltScoreSum+=dayScore;tiltScoreCount++;
+          b.querySelector(".day-content").innerHTML=`<div class="pnl">${money(p)}</div><div class="day-meta">${t} ${t===1?"trade":"trades"}<br>${wr.toFixed(1)}%</div>`;
+          mp+=p;md++;mt+=t;mw+=w;weeks[wi].pnl+=p;weeks[wi].days++;weeks[wi].trades+=t;weeks[wi].wins+=w;if(e.discipline)weeks[wi].discipline.push(e.discipline)}
+        b.addEventListener("click",()=>openDialog(k));$("calendarGrid").appendChild(b)}
+      $("monthPnl").textContent=money(mp);$("monthDays").textContent=`${md} ${md===1?"day":"days"}`;
+      $("weekColumn").style.setProperty("--wk-rows",weeks.length);
+      let wkRunning=SETTINGS.monthlyStart;const weekStarts=weeks.map((w,i)=>{const key=`${y}-${m}-${i}`;const s=weeklyOverrides[key]!==undefined?weeklyOverrides[key]:wkRunning;wkRunning=s+w.pnl;return s});
+      $("weekColumn").innerHTML="";weeks.forEach((w,i)=>{const pct=w.days&&weekStarts[i]?w.pnl/weekStarts[i]*100:null;$("weekColumn").insertAdjacentHTML("beforeend",`<div class="week-card"><div class="week-label">WEEK ${i+1}</div><div class="week-total ${w.pnl>0?"positive":w.pnl<0?"negative":""}">${money(w.pnl)}</div>${pct!==null?`<div class="week-pct ${pct>0?"positive":pct<0?"negative":""}">${pct.toFixed(1)}%</div>`:""}<div class="week-days">${w.days} ${w.days===1?"day":"days"}</div></div>`)});
+      $("yearPill").textContent=y;renderTilt(tiltScoreSum,tiltScoreCount);
+      renderDashboard(mp,mt,mw,weeks,y,m);renderWeeklyRows(weeks,y,m,first,dim,weekStarts);renderEquityChart();renderPnlBars();
+    }
+    function renderTilt(scoreSum,count){
+      const greenPct=count?Math.max(0,Math.min(100,50+(scoreSum/count)*50)):50;
+      const redPct=100-greenPct;
+      $("tiltTrack").style.gridTemplateColumns=`${redPct}% ${greenPct}%`;
+      let status;
+      if(!count)status="🟡 STABLE";
+      else if(greenPct>=65)status="🟢 STRONG";
+      else if(greenPct<=35)status="🔴 AT RISK";
+      else status="🟡 STABLE";
+      $("tiltStatus").textContent=status;
+    }
+    function money2(v){const n=Number(v);const s=n<0?"-":"";const a=Math.abs(n);return a>=1000?`${s}$${(a/1000).toFixed(1)}K`:`${s}$${a.toFixed(0)}`}
+    function renderEquityChart(){
+      const el=$("equityWrap"),me=monthEntries();
+      const pts=[{label:"Start",value:SETTINGS.monthlyStart}];let running=SETTINGS.monthlyStart;
+      me.forEach(([d,e])=>{running+=Number(e.pnl||0);pts.push({label:`${Number(d.split("-")[2])}`,value:running})});
+      if(pts.length<2){el.innerHTML='<div class="graph-empty">No trades logged yet this month — log a day to start plotting the equity curve.</div>';return}
+      const W=600,H=200,padL=44,padR=12,padT=10,padB=22,plotW=W-padL-padR,plotH=H-padT-padB;
+      const values=pts.map(p=>p.value);let min=Math.min(...values),max=Math.max(...values);if(min===max){min-=1;max+=1}const range=max-min;
+      const xStep=pts.length>1?plotW/(pts.length-1):0;const X=i=>padL+i*xStep;const Y=v=>padT+(1-(v-min)/range)*plotH;
+      const step=Math.max(1,Math.ceil(pts.length/9));
+      const ticks=Array.from({length:4},(_,i)=>min+range*i/3);
+      let grid="";ticks.forEach(t=>{const ty=Y(t);grid+=`<line class="chart-grid" x1="${padL}" y1="${ty.toFixed(1)}" x2="${W-padR}" y2="${ty.toFixed(1)}"/><text class="chart-axis" x="${padL-6}" y="${(ty+3).toFixed(1)}" text-anchor="end">${money2(t)}</text>`});
+      let xlabels="";pts.forEach((p,i)=>{if(i%step===0||i===pts.length-1)xlabels+=`<text class="chart-axis" x="${X(i).toFixed(1)}" y="${H-6}" text-anchor="middle">${p.label}</text>`});
+      const line=pts.map((p,i)=>`${X(i).toFixed(1)},${Y(p.value).toFixed(1)}`).join(" ");
+      const area=`M ${X(0).toFixed(1)},${(padT+plotH).toFixed(1)} L ${line} L ${X(pts.length-1).toFixed(1)},${(padT+plotH).toFixed(1)} Z`;
+      const dots=pts.map((p,i)=>`<circle class="equity-dot" cx="${X(i).toFixed(1)}" cy="${Y(p.value).toFixed(1)}" r="3"/>`).join("");
+      el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><defs><linearGradient id="eqGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--cyan)" stop-opacity=".35"/><stop offset="100%" stop-color="var(--cyan)" stop-opacity="0"/></linearGradient></defs>${grid}<path class="equity-area" d="${area}" fill="url(#eqGrad)"/><polyline class="equity-line" points="${line}"/>${dots}${xlabels}</svg>`;
+    }
+    function renderPnlBars(){
+      const el=$("barsWrap"),data=monthEntries().map(([d,e])=>({label:`${Number(d.split("-")[2])}`,value:Number(e.pnl||0)}));
+      if(!data.length){el.innerHTML='<div class="graph-empty">No trades logged yet this month.</div>';return}
+      const W=600,H=200,padL=40,padR=12,padT=10,padB=22,plotW=W-padL-padR,plotH=H-padT-padB;
+      const maxAbs=Math.max(1,...data.map(d=>Math.abs(d.value)));const baselineY=padT+plotH/2;
+      const gap=plotW/data.length,bw=Math.min(34,gap*0.55);
+      let bars="";data.forEach((d,i)=>{const cx=padL+gap*i+gap/2,h=Math.max((Math.abs(d.value)/maxAbs)*(plotH/2-6),2),y=d.value>=0?baselineY-h:baselineY,cls=d.value>=0?"profit":"loss";
+        bars+=`<rect class="pnl-bar ${cls}" x="${(cx-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="3"/><text class="chart-axis" x="${cx.toFixed(1)}" y="${H-6}" text-anchor="middle">${d.label}</text>`});
+      el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="pnl-baseline" x1="${padL}" y1="${baselineY.toFixed(1)}" x2="${W-padR}" y2="${baselineY.toFixed(1)}"/>${bars}</svg>`;
+    }
+    let currentWeeklyKey=null;
+    function renderDashboard(monthPnl,trades,wins,weeks,y,m){
+      const all=allEntries(),gross=all.reduce((s,[,e])=>s+Number(e.pnl||0),0),current=SETTINGS.monthlyStart+gross-SETTINGS.withdrawals;
+      const winrate=trades?wins/trades*100:0;const monthPct=SETTINGS.monthlyStart?monthPnl/SETTINGS.monthlyStart*100:0;
+      let activeWeekIdx=-1;for(let i=weeks.length-1;i>=0;i--){if(weeks[i].days>0){activeWeekIdx=i;break}}
+      const activeWeek=activeWeekIdx>=0?weeks[activeWeekIdx]:null;
+      currentWeeklyKey=`${y}-${m}-${activeWeekIdx}`;
+      let weeklyStart=activeWeek?current-activeWeek.pnl:SETTINGS.monthlyStart;
+      if(weeklyOverrides[currentWeeklyKey]!==undefined)weeklyStart=weeklyOverrides[currentWeeklyKey];
+      $("monthlyStart").textContent=money(SETTINGS.monthlyStart);$("weeklyStart").textContent=money(weeklyStart);$("currentBalance").textContent=money(current);
+      $("todayTarget").textContent=money(current*(1+SETTINGS.dailyTargetPct));$("dailyProfit").textContent=money(current*SETTINGS.dailyTargetPct);$("grossPnl").textContent=money(gross);
+      $("stopTarget").textContent=money(current*(1-SETTINGS.stopPct));$("monthlyWinrate").textContent=`${winrate.toFixed(2)}%`;$("monthlyPercentage").textContent=`${monthPct.toFixed(2)}%`;
+      $("monthlyTarget").textContent=money(SETTINGS.monthlyStart*SETTINGS.monthlyTargetMultiplier);$("withdrawWages").textContent=money(monthPnl*SETTINGS.withdrawPct);
+      $("fromTo").textContent=`${money(SETTINGS.monthlyStart)} → ${money(current)}`;$("summaryPnl").textContent=money(gross);
+    }
+    function renderWeeklyRows(weeks,y,m,first,dim,weekStarts){
+      $("weeklyRows").innerHTML="";
+      $("weeklyRows").style.setProperty("--table-rows",weeks.length);
+      const firstWeekEnd = 7 - first;
+      const ranges = weeks.map((_,i)=>i===0
+        ? [1, Math.min(dim, firstWeekEnd)]
+        : [firstWeekEnd + 1 + (i-1)*7, Math.min(dim, firstWeekEnd + i*7)]);
+
+      weeks.forEach((w,i)=>{
+        const [startDay,endDay]=ranges[i];
+        const hasRange=startDay<=dim && endDay>=startDay;
+        const range=hasRange
+          ? `${new Date(y,m,startDay).toLocaleDateString("en-NZ",{month:"short",day:"numeric"})} – ${new Date(y,m,endDay).toLocaleDateString("en-NZ",{month:"short",day:"numeric",year:"numeric"})}`
+          : "—";
+        const pct=w.days&&weekStarts[i]?w.pnl/weekStarts[i]*100:0;
+        const disc=[...new Set(w.discipline)].join(" • ")||"—";
+        $("weeklyRows").insertAdjacentHTML("beforeend",
+          `<div class="week-row">
+            <div class="weekname">WEEK ${String(i+1).padStart(2,"0")}</div>
+            <div>${range}</div>
+            <div>${w.trades||"—"}</div>
+            <div class="${w.pnl>0?"positive":w.pnl<0?"negative":""}">${w.days?money(w.pnl):"—"}</div>
+            <div class="${pct>0?"positive":pct<0?"negative":""}">${w.days?pct.toFixed(2)+"%":"—"}</div>
+            <div>${disc}</div>
+          </div>`)
+      })
+    }
+    function openDialog(k){selected=k;const e=entries[k]||{};$("dialogTitle").textContent=entries[k]?"Edit trading day":"Add trading day";$("entryDate").value=k;$("entryPnl").value=e.pnl??"";$("entryTrades").value=e.trades??"";$("entryWins").value=e.wins??"";$("entryDiscipline").value=e.discipline??"";$("entryNotes").value=e.notes??"";$("deleteEntry").style.visibility=entries[k]?"visible":"hidden";$("entryDialog").showModal()}
+    function closeDialog(){selected=null;$("entryDialog").close()}
+    $("saveEntry").addEventListener("click",()=>{if(!selected)return;const t=Math.max(0,Number($("entryTrades").value||0)),w=Math.min(t,Math.max(0,Number($("entryWins").value||0)));entries[selected]={pnl:Number($("entryPnl").value||0),trades:t,wins:w,discipline:$("entryDiscipline").value,notes:$("entryNotes").value.trim()};persist();render();closeDialog()});
+    $("deleteEntry").addEventListener("click",()=>{if(selected&&entries[selected]){delete entries[selected];persist();render();closeDialog()}});
+    $("prevMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()-1,1);render()});$("nextMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()+1,1);render()});
+    $("thisMonth").addEventListener("click",()=>{const d=new Date();currentMonth=new Date(d.getFullYear(),d.getMonth(),1);render()});$("closeDialog").addEventListener("click",closeDialog);$("cancelDialog").addEventListener("click",closeDialog);
+    $("resetMonth").addEventListener("click",()=>{if(confirm("Delete all entries in the displayed month?")){monthEntries().forEach(([d])=>delete entries[d]);persist();render()}});
+    $("updateMonthly").addEventListener("click",()=>{const v=prompt("Set monthly start balance ($):",SETTINGS.monthlyStart.toFixed(2));if(v===null)return;const n=Number(v);if(!isFinite(n)||n<0)return alert("Enter a valid positive number.");SETTINGS.monthlyStart=n;persist();render()});
+    $("updateWeekly").addEventListener("click",()=>{const cur=$("weeklyStart").textContent.replace(/[^0-9.\-]/g,"");const v=prompt("Set this week's start balance ($):",cur);if(v===null)return;const n=Number(v);if(!isFinite(n)||n<0)return alert("Enter a valid positive number.");weeklyOverrides[currentWeeklyKey]=n;persist();render()});
+    // ---- Backup to file (always available, no setup needed) ----
+    $("exportBtn").addEventListener("click",()=>{
+      const payload={entries,settings:SETTINGS,weeklyOverrides,exportedAt:new Date().toISOString()};
+      const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");
+      a.href=url;a.download=`trading-journal-backup-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a);a.click();a.remove();
+      URL.revokeObjectURL(url);
+    });
+    $("importBtn").addEventListener("click",()=>$("importFile").click());
+    $("importFile").addEventListener("change",e=>{
+      const file=e.target.files[0];if(!file)return;
+      const reader=new FileReader();
+      reader.onload=()=>{
+        try{
+          const data=JSON.parse(reader.result);
+          if(!data||typeof data.entries!=="object")throw new Error("bad file");
+          if(!confirm("This will replace all your current data with this backup file. Continue?"))return;
+          entries=data.entries||{};SETTINGS={...DEFAULT_SETTINGS,...(data.settings||{})};weeklyOverrides=data.weeklyOverrides||{};
+          persist();render();alert("Backup restored.");
+        }catch{alert("Couldn't read this file — make sure it's a backup file downloaded from this journal.")}
+      };
+      reader.readAsText(file);e.target.value="";
+    });
+    // ---- Optional Google Sheet backup (only active once connected) ----
+    const SHEET_URL_KEY="amanJournalSheetUrl";let sheetUrl=localStorage.getItem(SHEET_URL_KEY)||"";
+    function updateSheetBtn(){$("sheetBtnLabel").textContent=sheetUrl?"Synced to Sheet":"Connect Google Sheet";$("sheetBtn").classList.toggle("connected",!!sheetUrl)}
+    updateSheetBtn();
+    async function syncToSheet(manual){
+      if(!sheetUrl)return;
+      try{
+        await fetch(sheetUrl,{method:"POST",body:JSON.stringify({entries,settings:SETTINGS,weeklyOverrides}),headers:{"Content-Type":"text/plain;charset=utf-8"}});
+        if(manual)alert("Synced to Google Sheet.");
+      }catch{if(manual)alert("Couldn't reach the Google Sheet right now. Your data is still saved safely on this device — try again later.")}
+    }
+    async function restoreFromSheet(){
+      if(!sheetUrl)return;
+      if(!confirm("This will replace your current data with what's saved in the Google Sheet. Continue?"))return;
+      try{
+        const res=await fetch(sheetUrl);const data=await res.json();
+        entries=data.entries||{};SETTINGS={...DEFAULT_SETTINGS,...(data.settings||{})};weeklyOverrides=data.weeklyOverrides||{};
+        persist();render();alert("Restored from Google Sheet.");
+      }catch{alert("Couldn't reach the Google Sheet right now.")}
+    }
+    $("sheetBtn").addEventListener("click",()=>{
+      if(!sheetUrl){
+        const url=prompt("Paste your Google Apps Script Web App URL (from the setup guide):");
+        if(!url)return;
+        sheetUrl=url.trim();localStorage.setItem(SHEET_URL_KEY,sheetUrl);updateSheetBtn();syncToSheet(true);return;
+      }
+      const action=(prompt("Sheet connected. Type: 'sync' to push now, 'restore' to pull from the Sheet, or 'disconnect' to unlink.","sync")||"").toLowerCase().trim();
+      if(action==="disconnect"){sheetUrl="";localStorage.removeItem(SHEET_URL_KEY);updateSheetBtn();return}
+      if(action==="restore"){restoreFromSheet();return}
+      if(action==="sync")syncToSheet(true);
+    });
+    $("entryDialog").addEventListener("click",e=>{if(e.target===$("entryDialog"))closeDialog()});render();
+  </script>
+</body>
+</html>
