@@ -27,6 +27,8 @@
     .metric-card .value{margin-top:auto;padding-top:10px}
     .metric-card .icon{font-size:18px;opacity:.9}.metric-card .label{margin-top:8px;font-size:11.5px;font-weight:600;line-height:1.35;letter-spacing:.2px}.metric-card .value{font-size:25px;font-weight:700;letter-spacing:-.2px}
     .update-btn{position:absolute;top:11px;right:11px;padding:3px 10px;border:1px solid var(--cyan);color:var(--cyan);background:rgba(0,234,255,.08);border-radius:999px;font-size:10px;font-weight:700;cursor:pointer}
+    .reset-auto-btn{position:absolute;top:34px;right:11px;padding:3px 8px;border:1px solid #ff9d3d;color:#ff9d3d;background:rgba(255,157,61,.08);border-radius:999px;font-size:9px;font-weight:700;cursor:pointer}
+    .reset-auto-btn:hover{background:rgba(255,157,61,.2)}
     .update-btn:hover{background:rgba(0,234,255,.2)}
     .manual-tag{font-size:9px;font-weight:500;opacity:.65;letter-spacing:.1px}
     .cyan{color:var(--cyan)}.purple{color:var(--purple)}.green{color:var(--green)}.red{color:var(--red)}.gold{color:var(--gold)}.white{color:var(--text)}
@@ -97,8 +99,8 @@
   <main class="app">
     <section class="top-grid">
       <div class="brand"><strong>DAILY TRADING</strong><span>JOURNAL</span><div class="year-pill" id="yearPill">2026</div></div>
-      <div class="metric-card cyan"><div class="icon">$</div><button class="update-btn" id="updateMonthly" type="button">Update</button><div class="label">MONTHLY <span class="manual-tag">(MANUAL)</span><br>START BALANCE</div><div class="value white" id="monthlyStart">$47.91</div></div>
-      <div class="metric-card cyan"><div class="icon">♟</div><button class="update-btn" id="updateWeekly" type="button">Update</button><div class="label">WEEKLY <span class="manual-tag">(MANUAL)</span><br>START BALANCE</div><div class="value white" id="weeklyStart">$47.91</div></div>
+      <div class="metric-card cyan"><div class="icon">$</div><button class="update-btn" id="updateMonthly" type="button">Update</button><button class="reset-auto-btn" id="resetMonthlyAuto" type="button" style="display:none" title="This month has a manually-entered value. Click to clear it and go back to automatic.">↺ auto</button><div class="label">MONTHLY <span class="manual-tag">(MANUAL)</span><br>START BALANCE</div><div class="value white" id="monthlyStart">$47.91</div></div>
+      <div class="metric-card cyan"><div class="icon">♟</div><button class="update-btn" id="updateWeekly" type="button">Update</button><button class="reset-auto-btn" id="resetWeeklyAuto" type="button" style="display:none" title="This week has a manually-entered value. Click to clear it and go back to automatic.">↺ auto</button><div class="label">WEEKLY <span class="manual-tag">(MANUAL)</span><br>START BALANCE</div><div class="value white" id="weeklyStart">$47.91</div></div>
       <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE</div><div class="value" id="currentBalance">$47.91</div></div>
       <div class="metric-card purple"><div class="icon">▣</div><div class="label"><span class="purple">TARGET</span> <span class="white">FOR TODAY</span></div><div class="value purple" id="todayTarget">$50.31</div></div>
       <div class="metric-card green"><div class="icon">⊕</div><div class="label">DAILY PROFITS</div><div class="value white" id="dailyProfit">$0.00</div></div>
@@ -232,6 +234,7 @@
     function render(){
       const y=currentMonth.getFullYear(),m=currentMonth.getMonth(),first=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate(),cells=Math.ceil((first+dim)/7)*7,rowCount=cells/7;
       currentMonthlyKey=`${y}-${m}`;currentMonthlyStart=computeMonthlyStart(y,m);
+      $("resetMonthlyAuto").style.display=monthlyStartOverrides[currentMonthlyKey]!==undefined?"block":"none";
       $("monthLabel").textContent=currentMonth.toLocaleDateString("en-NZ",{month:"long",year:"numeric"});
       $("calendarGrid").innerHTML="";const weeks=Array.from({length:rowCount},()=>({pnl:0,days:0,trades:0,wins:0,discipline:[]}));
       let mp=0,md=0,mt=0,mw=0,dayScores=[];
@@ -325,6 +328,7 @@
       currentWeeklyKey=`${y}-${m}-${activeWeekIdx}`;
       let weeklyStart=activeWeek?current-activeWeek.pnl:currentMonthlyStart;
       if(weeklyOverrides[currentWeeklyKey]!==undefined)weeklyStart=weeklyOverrides[currentWeeklyKey];
+      $("resetWeeklyAuto").style.display=weeklyOverrides[currentWeeklyKey]!==undefined?"block":"none";
       $("monthlyStart").textContent=money(currentMonthlyStart);$("weeklyStart").textContent=money(weeklyStart);$("currentBalance").textContent=money(current);
       $("todayTarget").textContent=money(current*(1+SETTINGS.dailyTargetPct));$("dailyProfit").textContent=money(current*SETTINGS.dailyTargetPct);$("grossPnl").textContent=money(monthPnl);
       $("stopTarget").textContent=money(current*(1-SETTINGS.stopPct));$("monthlyWinrate").textContent=`${winrate.toFixed(2)}%`;$("monthlyPercentage").textContent=`${monthPct.toFixed(2)}%`;
@@ -365,6 +369,8 @@
     $("prevMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()-1,1);render()});$("nextMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()+1,1);render()});
     $("thisMonth").addEventListener("click",()=>{const d=new Date();currentMonth=new Date(d.getFullYear(),d.getMonth(),1);render()});$("closeDialog").addEventListener("click",closeDialog);$("cancelDialog").addEventListener("click",closeDialog);
     $("resetMonth").addEventListener("click",()=>{if(confirm("Delete all entries in the displayed month?")){monthEntries().forEach(([d])=>delete entries[d]);persist();render()}});
+    $("resetMonthlyAuto").addEventListener("click",()=>{if(!confirm("Clear the manual value for this month and go back to automatic carry-forward?"))return;delete monthlyStartOverrides[currentMonthlyKey];persist();render()});
+    $("resetWeeklyAuto").addEventListener("click",()=>{if(!confirm("Clear the manual value for this week and go back to automatic?"))return;delete weeklyOverrides[currentWeeklyKey];persist();render()});
     $("updateMonthly").addEventListener("click",()=>{const v=prompt("Set this month's start balance ($):",currentMonthlyStart.toFixed(2));if(v===null)return;const n=Number(v);if(!isFinite(n)||n<0)return alert("Enter a valid positive number.");monthlyStartOverrides[currentMonthlyKey]=n;persist();render()});
     $("updateWeekly").addEventListener("click",()=>{const cur=$("weeklyStart").textContent.replace(/[^0-9.\-]/g,"");const v=prompt("Set this week's start balance ($):",cur);if(v===null)return;const n=Number(v);if(!isFinite(n)||n<0)return alert("Enter a valid positive number.");weeklyOverrides[currentWeeklyKey]=n;persist();render()});
     // ---- Backup to file (always available, no setup needed) ----
