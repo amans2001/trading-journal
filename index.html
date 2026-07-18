@@ -323,7 +323,15 @@
     function renderDashboard(monthPnl,trades,wins,weeks,y,m){
       const current=currentMonthlyStart+monthPnl-SETTINGS.withdrawals;
       const winrate=trades?wins/trades*100:0;const monthPct=currentMonthlyStart?monthPnl/currentMonthlyStart*100:0;
-      let activeWeekIdx=-1;for(let i=weeks.length-1;i>=0;i--){if(weeks[i].days>0){activeWeekIdx=i;break}}
+      let activeWeekIdx=-1;
+      const today=new Date();
+      if(y===today.getFullYear()&&m===today.getMonth()){
+        const d=today.getDate(),first=new Date(y,m,1).getDay(),firstWeekEnd=7-first;
+        activeWeekIdx=d<=firstWeekEnd?0:1+Math.floor((d-firstWeekEnd-1)/7);
+        activeWeekIdx=Math.min(activeWeekIdx,weeks.length-1);
+      }else{
+        for(let i=weeks.length-1;i>=0;i--){if(weeks[i].days>0){activeWeekIdx=i;break}}
+      }
       const activeWeek=activeWeekIdx>=0?weeks[activeWeekIdx]:null;
       currentWeeklyKey=`${y}-${m}-${activeWeekIdx}`;
       let weeklyStart=activeWeek?current-activeWeek.pnl:currentMonthlyStart;
