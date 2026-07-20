@@ -72,6 +72,34 @@
     }
     .tilt-top{display:flex;justify-content:space-between;align-items:center}.reset{padding:9px 13px;border:1px solid var(--cyan);color:var(--cyan);background:transparent;border-radius:10px;font-weight:900;cursor:pointer}.tilt-label{font-weight:900}
     .data-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}.mini-btn{padding:7px 11px;border:1px solid rgba(120,150,175,.3);color:#a9c1d1;background:#07131d;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer}.mini-btn:hover{border-color:var(--cyan);color:var(--cyan)}.mini-btn.connected{border-color:var(--green);color:var(--green)}
+    .view-toggle{display:flex;gap:6px;margin-bottom:6px}.view-tab{padding:4px 10px;border:1px solid var(--border);background:#07131d;color:#8ba3b4;border-radius:7px;font-size:10.5px;font-weight:800;cursor:pointer}.view-tab.active{border-color:var(--purple);color:var(--purple);background:rgba(168,85,247,.08)}.view-tab:hover{border-color:var(--cyan);color:var(--cyan)}.view-tab.active:hover{border-color:var(--purple);color:var(--purple)}
+    .challenge-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:8px}.challenge-title{font-size:17px;font-weight:900;color:var(--purple)}.challenge-sub{margin-top:4px;font-size:11px;color:#8ba3b4;font-style:italic;max-width:640px}
+    .challenge-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:8px}
+    .challenge-stats .metric-card{padding:11px;min-height:88px}.challenge-stats .icon{font-size:16px}.challenge-stats .label{margin-top:4px;font-size:10.5px;line-height:1.2}.challenge-stats .value{margin-top:6px;font-size:20px}
+    .challenge-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:10px;align-items:start}
+    .challenge-side{min-width:0}
+    .challenge-chart-panel .graph-wrap{flex:none;height:480px}
+    .challenge-table-panel{padding:10px}
+    .challenge-table-head{display:grid;grid-template-columns:14px 26px .55fr 1fr 1fr .8fr 1.05fr 1.05fr;gap:5px;padding:0 5px 6px;font-size:9px;font-weight:900;color:#8ba3b4;border-bottom:1px solid rgba(70,90,110,.25)}
+    .challenge-table-body{display:flex;flex-direction:column;gap:1px}
+    .challenge-row{display:grid;grid-template-columns:14px 26px .55fr 1fr 1fr .8fr 1.05fr 1.05fr;gap:5px;align-items:center;padding:2px 5px;border-radius:5px}
+    .challenge-row .num{color:#8ba3b4;font-weight:800;font-size:10px}
+    .challenge-row input,.challenge-row select{padding:4px 6px;font-size:11px;border-radius:6px;height:26px}
+    .challenge-row.win{background:rgba(57,230,124,.07)}.challenge-row.loss{background:rgba(255,73,103,.07)}
+    .heat-cell{width:8px;height:22px;border-radius:3px;background:#1c2b38}.heat-cell.h-win{background:var(--green)}.heat-cell.h-loss{background:var(--red)}.heat-cell.h-safe{background:rgba(57,230,124,.35)}
+    .ch-result.result-win{color:var(--green);font-weight:800}.ch-result.result-loss{color:var(--red);font-weight:800}
+    .money-input{position:relative}.money-input::before{content:"$";position:absolute;left:6px;top:50%;transform:translateY(-50%);font-size:9.5px;font-weight:800;color:#6f8a9c;pointer-events:none;z-index:1}
+    .money-input input{padding-left:14px !important;font-weight:800}
+    .money-input input.positive{color:var(--green)}.money-input input.negative{color:var(--red)}
+    .risk-display{padding:4px 5px;font-size:11px;font-weight:800;color:var(--red);text-align:center}
+    .challenge-side .recovery-box{padding:16px 8px}.challenge-side .recovery-box-label{font-size:11px}.challenge-side .recovery-box-value{font-size:22px;margin-top:8px}
+    .challenge-side .recovery-label{font-size:14px}.challenge-side .recovery-status{font-size:15px;margin-top:14px}
+    .challenge-total-row{display:grid;grid-template-columns:14px 26px .55fr 1fr 1fr .8fr 1.05fr 1.05fr;gap:5px;padding:6px 5px 2px;margin-top:3px;border-top:2px solid rgba(70,90,110,.4);font-weight:900;font-size:11px}
+    .challenge-total-row>div:first-child{grid-column:1/4;color:#8ba3b4}
+    .challenge-total-row>div:nth-child(2){grid-column:4;font-size:13px}
+    .challenge-total-row .positive{color:var(--green)}.challenge-total-row .negative{color:var(--red)}
+    .modal-body{padding:18px 20px;font-size:13.5px;line-height:1.8}.modal-body p{margin:0 0 4px}
+    .modal-footer{display:flex;justify-content:flex-end;gap:10px;padding:0 20px 20px}
     .recovery-section{margin-top:16px;padding-top:14px;border-top:1px solid rgba(70,90,110,.25)}.recovery-label{font-size:12px;font-weight:900;color:var(--purple);margin-bottom:10px}
     .recovery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.recovery-box{background:#0a1620;border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
     .recovery-box-label{font-size:9.5px;font-weight:800;color:#87b6d7;letter-spacing:.2px}.recovery-box-value{font-size:16px;font-weight:800;margin-top:6px}
@@ -97,6 +125,11 @@
 </head>
 <body>
   <main class="app">
+    <div class="view-toggle">
+      <button class="view-tab active" id="viewCalendarBtn" type="button">📅 Calendar</button>
+      <button class="view-tab" id="viewChallengeBtn" type="button">🎯 30 Trade Challenge</button>
+    </div>
+    <div id="calendarView">
     <section class="top-grid">
       <div class="brand"><strong>DAILY TRADING</strong><span>JOURNAL</span><div class="year-pill" id="yearPill">2026</div></div>
       <div class="metric-card cyan"><div class="icon">$</div><button class="update-btn" id="updateMonthly" type="button">Update</button><button class="reset-auto-btn" id="resetMonthlyAuto" type="button" style="display:none" title="This month has a manually-entered value. Click to clear it and go back to automatic.">↺ auto</button><div class="label">MONTHLY <span class="manual-tag">(MANUAL)</span><br>START BALANCE</div><div class="value white" id="monthlyStart">$47.91</div></div>
@@ -181,6 +214,61 @@
         </section>
       </div>
     </section>
+    </div>
+
+    <div id="challengeView" style="display:none">
+      <div class="challenge-header">
+        <div>
+          <div class="challenge-title">🎯 THE 30 TRADE CHALLENGE</div>
+          <div class="challenge-sub">"My job is not to make money today. My job is to earn the right to place Trade #1 tomorrow."</div>
+        </div>
+        <button class="reset" id="startNewChallenge" type="button">↻ START NEW CHALLENGE</button>
+      </div>
+
+      <div class="challenge-stats">
+        <div class="metric-card cyan"><div class="icon">$</div><button class="update-btn" id="updateChallengeStart" type="button">Update</button><div class="label">STARTING BALANCE</div><div class="value white" id="challengeStart">$0.00</div></div>
+        <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE</div><div class="value" id="challengeCurrent">$0.00</div></div>
+        <div class="metric-card purple"><div class="icon">▣</div><div class="label">TRADE PROGRESS</div><div class="value purple" id="challengeProgress">0 / 30</div></div>
+        <div class="metric-card white"><div class="icon">⊕</div><div class="label">NET P&amp;L</div><div class="value" id="challengeNetPnl">$0.00</div></div>
+        <div class="metric-card red"><div class="icon">⛨</div><div class="label">MAX RISK <span title="Locked when you started this sprint: under $100 = $20 flat, $100+ = 40% of that $100-tier. Stays fixed for all 30 trades — only changes on your next sprint.">ⓘ</span></div><div class="value" id="challengeMaxRisk">-$20.00</div></div>
+      </div>
+
+      <div class="challenge-grid">
+        <section class="panel challenge-table-panel">
+          <div class="challenge-table-head">
+            <div></div><div>#</div><div>W/L</div><div>ACTUAL P&amp;L</div><div>ACTUAL RISK</div><div>MAX RISK</div><div>TOOK +10?</div><div>ORIGINAL SL</div>
+          </div>
+          <div class="challenge-table-body" id="challengeRows"></div>
+          <div class="challenge-total-row"><div>TOTAL</div><div id="challengeTotalPnl">$0.00</div></div>
+        </section>
+
+        <div class="challenge-side">
+          <section class="panel tilt">
+            <div class="recovery-label">🎯 SPRINT OUTLOOK</div>
+            <div class="recovery-grid">
+              <div class="recovery-box"><div class="recovery-box-label">TO BREAKEVEN</div><div class="recovery-box-value" id="chToBreakeven">$0.00</div></div>
+              <div class="recovery-box"><div class="recovery-box-label">EXPECTED WIN</div><div class="recovery-box-value" id="chExpectedWin">$0.00</div></div>
+              <div class="recovery-box"><div class="recovery-box-label">WINS NEEDED</div><div class="recovery-box-value" id="chWinsNeeded">0</div></div>
+            </div>
+            <div class="recovery-status" id="chStatusLine">🟢 Protected</div>
+          </section>
+
+          <section class="panel graph-panel challenge-chart-panel" style="margin-top:12px">
+            <div class="section-title">📊 TRADE PERFORMANCE</div>
+            <div class="graph-wrap" id="challengeBarsWrap"></div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <dialog id="challengeModal">
+      <div class="modal-header"><h2>🎯 Challenge Complete</h2><button class="close" id="closeChallengeModal" type="button">✕</button></div>
+      <div class="modal-body" id="challengeSummaryBody"></div>
+      <div class="modal-footer">
+        <button class="btn" id="downloadChallengeResults" type="button">⬇ Download Results</button>
+        <button class="reset" id="startNewFromModal" type="button">↻ Start New Challenge</button>
+      </div>
+    </dialog>
   </main>
 
   <dialog id="entryDialog">
@@ -442,6 +530,209 @@
       $("equityWrap").style.display=tab.dataset.tab==="equity"?"block":"none";
       $("barsWrap").style.display=tab.dataset.tab==="bars"?"block":"none";
     }));
+    // ==== 30 Trade Challenge (separate storage, no cloud sync, no backup-file inclusion) ====
+    const CHALLENGE_KEY="amanJournalChallengeV1";
+    function tierMaxRisk(balance){
+      if(balance<100)return -20;
+      const tier=Math.floor(balance/100)*100;
+      return -(0.40*tier);
+    }
+    function loadChallenge(){
+      try{const x=localStorage.getItem(CHALLENGE_KEY);if(!x)throw 0;const parsed=JSON.parse(x);
+        if(parsed&&Array.isArray(parsed.trades)&&parsed.trades.length===30)return {maxRisk:tierMaxRisk(parsed.startingBalance||0),...parsed};
+        throw 0;
+      }catch{return {startingBalance:0,maxRisk:-20,trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:""})),_modalShown:false}}
+    }
+    let challenge=loadChallenge();
+    function persistChallenge(){localStorage.setItem(CHALLENGE_KEY,JSON.stringify(challenge))}
+    function enteredChallengeTrades(){return challenge.trades.filter(t=>t.result==="WIN"||t.result==="LOSS")}
+
+    function renderChallengeTable(){
+      const entered=enteredChallengeTrades();
+      const enteredCount=entered.length;
+      const currentBalance=challenge.startingBalance+entered.reduce((s,t)=>s+Number(t.pnl||0),0);
+      $("challengeMaxRisk").textContent=money(challenge.maxRisk);
+
+      // recompute wins-needed here too, so the heat map's "safety zone" always matches the stat exactly
+      const winsNeeded=computeWinsNeeded(currentBalance,enteredCount);
+
+      $("challengeRows").innerHTML=challenge.trades.map((t,i)=>{
+        const cls=t.result==="WIN"?"win":t.result==="LOSS"?"loss":"";
+        const opt=(val,cur)=>`${val===cur?" selected":""}`;
+        const pnlCls=t.pnl>0?"positive":t.pnl<0?"negative":"";
+        const resultCls=t.result==="WIN"?"result-win":t.result==="LOSS"?"result-loss":"";
+        let heatCls="";
+        if(t.result==="WIN")heatCls="h-win";
+        else if(t.result==="LOSS")heatCls="h-loss";
+        else if(winsNeeded===0||i-enteredCount<winsNeeded)heatCls="h-safe";
+        return `<div class="challenge-row ${cls}" data-idx="${i}">
+          <div class="heat-cell ${heatCls}" title="${heatCls==='h-safe'?'Within your safety net':''}"></div>
+          <div class="num">${String(i+1).padStart(2,"0")}</div>
+          <select class="ch-result ${resultCls}" data-idx="${i}">
+            <option value=""${opt("",t.result)}>—</option>
+            <option value="WIN" style="color:#39e67c"${opt("WIN",t.result)}>WIN</option>
+            <option value="LOSS" style="color:#ff4967"${opt("LOSS",t.result)}>LOSS</option>
+          </select>
+          <div class="money-input"><input type="number" step="0.01" class="ch-pnl ${pnlCls}" data-idx="${i}" placeholder="0.00" value="${t.pnl!==null&&t.pnl!==undefined?Number(t.pnl).toFixed(2):""}"></div>
+          <div class="money-input"><input type="number" step="0.01" class="ch-risk negative" data-idx="${i}" placeholder="0.00" value="${t.risk!==null&&t.risk!==undefined?Number(t.risk).toFixed(2):""}"></div>
+          <div class="risk-display">${money(challenge.maxRisk)}</div>
+          <select class="ch-took10" data-idx="${i}">
+            <option value=""${opt("",t.took10)}>—</option>
+            <option value="SL"${opt("SL",t.took10)}>🔴 SL</option>
+            <option value="TP10"${opt("TP10",t.took10)}>🟡 TP +10</option>
+            <option value="TP20"${opt("TP20",t.took10)}>🟢 TP +20</option>
+          </select>
+          <select class="ch-origsl" data-idx="${i}">
+            <option value=""${opt("",t.originalSL)}>—</option>
+            <option value="HitFull"${opt("HitFull",t.originalSL)}>🔴 Hit full</option>
+            <option value="FullSL"${opt("FullSL",t.originalSL)}>🟢 Full SL</option>
+            <option value="MSL"${opt("MSL",t.originalSL)}>🟡 M SL</option>
+          </select>
+        </div>`;
+      }).join("");
+      const netPnl=entered.reduce((s,t)=>s+Number(t.pnl||0),0);
+      $("challengeTotalPnl").textContent=money(netPnl);
+      $("challengeTotalPnl").className=netPnl>0?"positive":netPnl<0?"negative":"";
+    }
+
+    // Worst-case "don't end up underwater" calculation: if every remaining trade were a max loss
+    // at the risk locked in when this sprint started (never changes mid-sprint), how many wins
+    // (at your real average win size) would still be needed to finish at/above where you started?
+    function computeWinsNeeded(currentBalance,enteredCount){
+      const remaining=30-enteredCount;
+      if(remaining<=0)return 0;
+      const entered=enteredChallengeTrades();
+      let running=challenge.startingBalance,winPcts=[];
+      entered.forEach(t=>{const p=Number(t.pnl);if(t.result==="WIN"&&running>0)winPcts.push(p/running);running+=p});
+      const avgWinPct=winPcts.length?winPcts.reduce((a,b)=>a+b,0)/winPcts.length:SETTINGS.dailyTargetPct;
+      const expectedWin=avgWinPct*currentBalance;
+      const maxRiskAbs=Math.abs(challenge.maxRisk);
+      const gap=challenge.startingBalance-currentBalance;
+      const denom=maxRiskAbs+expectedWin;
+      if(denom<=0)return remaining;
+      let winsNeeded=Math.max(0,Math.ceil((gap+remaining*maxRiskAbs)/denom));
+      return Math.min(winsNeeded,remaining);
+    }
+
+    function renderChallengeBars(){
+      const data=enteredChallengeTrades().map(t=>({label:`${challenge.trades.indexOf(t)+1}`,value:Number(t.pnl)}));
+      const el=$("challengeBarsWrap");
+      if(!data.length){el.innerHTML='<div class="graph-empty">No trades logged yet — log your first trade to start this sprint.</div>';return}
+      const W=600,H=200,padL=40,padR=12,padT=10,padB=22,plotW=W-padL-padR,plotH=H-padT-padB;
+      const maxAbs=Math.max(1,...data.map(d=>Math.abs(d.value)));const baselineY=padT+plotH/2;
+      const gap=plotW/data.length,bw=Math.min(20,gap*0.55);
+      let bars="";data.forEach((d,i)=>{const cx=padL+gap*i+gap/2,h=Math.max((Math.abs(d.value)/maxAbs)*(plotH/2-6),2),y=d.value>=0?baselineY-h:baselineY,cls=d.value>=0?"profit":"loss";
+        bars+=`<rect class="pnl-bar ${cls}" x="${(cx-bw/2).toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="1"/>`;
+        if(data.length<=15)bars+=`<text class="chart-axis" x="${cx.toFixed(1)}" y="${H-6}" text-anchor="middle">${d.label}</text>`});
+      el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="pnl-baseline" x1="${padL}" y1="${baselineY.toFixed(1)}" x2="${W-padR}" y2="${baselineY.toFixed(1)}"/>${bars}</svg>`;
+    }
+
+    function renderChallengeStats(){
+      const entered=enteredChallengeTrades();
+      const netPnl=entered.reduce((s,t)=>s+Number(t.pnl||0),0);
+      const current=challenge.startingBalance+netPnl;
+      $("challengeStart").textContent=money(challenge.startingBalance);
+      $("challengeCurrent").textContent=money(current);
+      $("challengeProgress").textContent=`${entered.length} / 30`;
+      $("challengeNetPnl").textContent=money(netPnl);
+
+      let running=challenge.startingBalance,winPcts=[];
+      entered.forEach(t=>{const p=Number(t.pnl);if(t.result==="WIN"&&running>0)winPcts.push(p/running);running+=p});
+      const avgWinPct=winPcts.length?winPcts.reduce((a,b)=>a+b,0)/winPcts.length:SETTINGS.dailyTargetPct;
+      const expectedWin=avgWinPct*current;
+      $("chExpectedWin").textContent=money(expectedWin);
+      $("chToBreakeven").textContent=money(Math.max(0,challenge.startingBalance-current));
+
+      const winsNeeded=computeWinsNeeded(current,entered.length);
+      const remaining=30-entered.length;
+      $("chWinsNeeded").textContent=remaining<=0?"—":(winsNeeded>=remaining&&winsNeeded>0?`${winsNeeded}*`:winsNeeded);
+      let statusLine;
+      if(remaining<=0)statusLine="🏁 Sprint Complete";
+      else if(winsNeeded===0)statusLine="🟢 Protected";
+      else if(winsNeeded===1)statusLine="🟡 1 Win Needed";
+      else if(winsNeeded===2)statusLine="🟠 2 Wins Needed";
+      else statusLine=`🔴 ${winsNeeded}${winsNeeded>=remaining?"+":""} Wins Needed`;
+      $("chStatusLine").textContent=statusLine;
+
+      renderChallengeBars();
+
+      if(entered.length===30&&!challenge._modalShown){showChallengeModal()}
+    }
+
+    function renderChallengeFull(){renderChallengeTable();renderChallengeStats()}
+
+    function showChallengeModal(){
+      const entered=enteredChallengeTrades();
+      const wins=entered.filter(t=>t.result==="WIN").length,losses=entered.filter(t=>t.result==="LOSS").length;
+      const winRate=entered.length?(wins/entered.length*100).toFixed(1):"0.0";
+      const netPnl=entered.reduce((s,t)=>s+Number(t.pnl||0),0);
+      const took10Counts={SL:0,TP10:0,TP20:0},origSLCounts={HitFull:0,FullSL:0,MSL:0};
+      challenge.trades.forEach(t=>{if(t.took10&&took10Counts[t.took10]!==undefined)took10Counts[t.took10]++;if(t.originalSL&&origSLCounts[t.originalSL]!==undefined)origSLCounts[t.originalSL]++});
+      $("challengeSummaryBody").innerHTML=`
+        <p><strong>Win rate:</strong> ${winRate}% (${wins}W / ${losses}L)</p>
+        <p><strong>Net P&amp;L:</strong> ${money(netPnl)}</p>
+        <p><strong>Ending balance:</strong> ${money(challenge.startingBalance+netPnl)}</p>
+        <p style="margin-top:12px"><strong>Took +10? breakdown</strong><br>🔴 Stopped out: ${took10Counts.SL} &nbsp; 🟡 Hit +10: ${took10Counts.TP10} &nbsp; 🟢 Hit +20: ${took10Counts.TP20}</p>
+        <p style="margin-top:8px"><strong>Original SL breakdown</strong><br>🔴 Hit full: ${origSLCounts.HitFull} &nbsp; 🟢 Never threatened: ${origSLCounts.FullSL} &nbsp; 🟡 Manually moved: ${origSLCounts.MSL}</p>`;
+      challenge._modalShown=true;persistChallenge();
+      $("challengeModal").showModal();
+    }
+
+    function startNewChallengeFlow(){
+      if(enteredChallengeTrades().length&&!confirm("This will clear all 30 trade rows and start a fresh challenge. Continue?"))return;
+      const snapshot=Number($("currentBalance").textContent.replace(/[^0-9.\-]/g,""))||0;
+      challenge={startingBalance:snapshot,maxRisk:tierMaxRisk(snapshot),trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:""})),_modalShown:false};
+      persistChallenge();renderChallengeFull();
+    }
+
+    $("challengeRows").addEventListener("input",e=>{
+      const idx=e.target.dataset.idx;if(idx===undefined)return;
+      if(e.target.classList.contains("ch-pnl")){
+        challenge.trades[idx].pnl=e.target.value===""?null:Number(e.target.value);
+        e.target.classList.remove("positive","negative");
+        if(challenge.trades[idx].pnl>0)e.target.classList.add("positive");else if(challenge.trades[idx].pnl<0)e.target.classList.add("negative");
+      }
+      if(e.target.classList.contains("ch-risk"))challenge.trades[idx].risk=e.target.value===""?null:Number(e.target.value);
+      persistChallenge();renderChallengeStats();
+      const netPnl=enteredChallengeTrades().reduce((s,t)=>s+Number(t.pnl||0),0);
+      $("challengeTotalPnl").textContent=money(netPnl);
+      $("challengeTotalPnl").className=netPnl>0?"positive":netPnl<0?"negative":"";
+    });
+    $("challengeRows").addEventListener("change",e=>{
+      const idx=e.target.dataset.idx;if(idx===undefined)return;
+      if(e.target.classList.contains("ch-result"))challenge.trades[idx].result=e.target.value;
+      if(e.target.classList.contains("ch-took10"))challenge.trades[idx].took10=e.target.value;
+      if(e.target.classList.contains("ch-origsl"))challenge.trades[idx].originalSL=e.target.value;
+      persistChallenge();renderChallengeFull();
+    });
+    $("updateChallengeStart").addEventListener("click",()=>{
+      const v=prompt("Set the starting balance for this challenge ($):",challenge.startingBalance.toFixed(2));
+      if(v===null)return;const n=Number(v);if(!isFinite(n))return alert("Enter a valid number.");
+      challenge.startingBalance=n;persistChallenge();renderChallengeFull();
+    });
+    $("startNewChallenge").addEventListener("click",startNewChallengeFlow);
+    $("startNewFromModal").addEventListener("click",()=>{$("challengeModal").close();startNewChallengeFlow()});
+    $("closeChallengeModal").addEventListener("click",()=>$("challengeModal").close());
+    $("challengeModal").addEventListener("click",e=>{if(e.target===$("challengeModal"))$("challengeModal").close()});
+    $("downloadChallengeResults").addEventListener("click",()=>{
+      const netPnl=enteredChallengeTrades().reduce((s,t)=>s+Number(t.pnl||0),0);
+      const lines=["30 Trade Challenge Results",`Starting Balance: ${money(challenge.startingBalance)}`,`Ending Balance: ${money(challenge.startingBalance+netPnl)}`,`Net P&L: ${money(netPnl)}`,`Max Risk (locked for this sprint): ${money(challenge.maxRisk)}`,"","Trade #, Result, P&L, Risk, Took +10?, Original SL"];
+      challenge.trades.forEach((t,i)=>lines.push(`${i+1}, ${t.result||""}, ${t.pnl??""}, ${t.risk??""}, ${t.took10||""}, ${t.originalSL||""}`));
+      const blob=new Blob([lines.join("\n")],{type:"text/plain"});const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");a.href=url;a.download=`30-trade-challenge-${new Date().toISOString().slice(0,10)}.txt`;
+      document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+    });
+
+    $("viewCalendarBtn").addEventListener("click",()=>{
+      $("viewCalendarBtn").classList.add("active");$("viewChallengeBtn").classList.remove("active");
+      $("calendarView").style.display="";$("challengeView").style.display="none";
+    });
+    $("viewChallengeBtn").addEventListener("click",()=>{
+      $("viewChallengeBtn").classList.add("active");$("viewCalendarBtn").classList.remove("active");
+      $("calendarView").style.display="none";$("challengeView").style.display="";
+      renderChallengeFull();
+    });
+
     $("entryDialog").addEventListener("click",e=>{if(e.target===$("entryDialog"))closeDialog()});render();
   </script>
 </body>
