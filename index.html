@@ -236,7 +236,7 @@
         <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE <span id="syncCheck" title="Compares this sprint's tracked balance against your main dashboard's real Current Balance">$0.00</span></div><div class="value" id="challengeCurrent">$0.00</div></div>
         <div class="metric-card purple"><div class="icon">▣</div><div class="label">TRADE PROGRESS</div><div class="value purple" id="challengeProgress">0 / 30</div></div>
         <div class="metric-card white"><div class="icon">⊕</div><div class="label">NET P&amp;L</div><div class="value" id="challengeNetPnl">$0.00</div></div>
-        <div class="metric-card red"><div class="icon">⛨</div><div class="label">MAX RISK <span title="Locked when you started this sprint: under $100 = $20 flat, $100+ = 40% of that $100-tier. Stays fixed for all 30 trades — only changes on your next sprint.">ⓘ</span></div><div class="value" id="challengeMaxRisk">-$20.00</div></div>
+        <div class="metric-card red"><div class="icon">⛨</div><button class="update-btn" id="updateChallengeMaxRisk" type="button">Update</button><div class="label">MAX RISK <span title="Auto-locked when you started this sprint. Use Update to manually override it mid-sprint if needed — it'll stay at whatever you set until your next sprint or another manual change.">ⓘ</span></div><div class="value" id="challengeMaxRisk">-$20.00</div></div>
       </div>
 
       <div class="challenge-grid">
@@ -726,6 +726,11 @@
       const v=prompt("Set the starting balance for this challenge ($):",challenge.startingBalance.toFixed(2));
       if(v===null)return;const n=Number(v);if(!isFinite(n))return alert("Enter a valid number.");
       challenge.startingBalance=n;persistChallenge();renderChallengeFull();
+    });
+    $("updateChallengeMaxRisk").addEventListener("click",()=>{
+      const v=prompt("Set the max risk per trade for this sprint ($ — just type the number, e.g. 20):",Math.abs(challenge.maxRisk));
+      if(v===null)return;const n=Number(v);if(!isFinite(n)||n<0)return alert("Enter a valid positive number.");
+      challenge.maxRisk=-Math.abs(n);persistChallenge();renderChallengeFull();
     });
     $("startNewChallenge").addEventListener("click",startNewChallengeFlow);
     $("startNewFromModal").addEventListener("click",()=>{$("challengeModal").close();startNewChallengeFlow()});
