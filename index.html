@@ -93,6 +93,11 @@
     .money-input input.positive{color:var(--green)}.money-input input.negative{color:var(--red)}
     .risk-display{padding:4px 5px;font-size:11px;font-weight:800;color:var(--red);text-align:center}
     .challenge-side .recovery-box{padding:16px 8px}.challenge-side .recovery-box-label{font-size:11px}.challenge-side .recovery-box-value{font-size:22px;margin-top:8px}
+    #chWinsNeeded.wn-green{color:var(--green)}#chWinsNeeded.wn-yellow{color:#ffd21e}#chWinsNeeded.wn-orange{color:#ff9d3d}#chWinsNeeded.wn-red{color:var(--red)}
+    #chWinsNeeded.wn-green,#chWinsNeeded.wn-yellow,#chWinsNeeded.wn-orange,#chWinsNeeded.wn-red{font-size:26px}
+    #syncCheck{float:right;font-weight:900;font-size:10.5px}#syncCheck.sync-match{color:var(--green)}#syncCheck.sync-mismatch{color:#ffd21e}
+    .recovery-box:has(#chWinsNeeded){border-width:1.5px}
+    .recovery-box:has(#chWinsNeeded.wn-green){border-color:var(--green)}.recovery-box:has(#chWinsNeeded.wn-yellow){border-color:#ffd21e}.recovery-box:has(#chWinsNeeded.wn-orange){border-color:#ff9d3d}.recovery-box:has(#chWinsNeeded.wn-red){border-color:var(--red)}
     .challenge-side .recovery-label{font-size:14px}.challenge-side .recovery-status{font-size:15px;margin-top:14px}
     .challenge-total-row{display:grid;grid-template-columns:14px 26px .55fr 1fr 1fr .8fr 1.05fr 1.05fr;gap:5px;padding:6px 5px 2px;margin-top:3px;border-top:2px solid rgba(70,90,110,.4);font-weight:900;font-size:11px}
     .challenge-total-row>div:first-child{grid-column:1/4;color:#8ba3b4}
@@ -227,7 +232,7 @@
 
       <div class="challenge-stats">
         <div class="metric-card cyan"><div class="icon">$</div><button class="update-btn" id="updateChallengeStart" type="button">Update</button><div class="label">STARTING BALANCE</div><div class="value white" id="challengeStart">$0.00</div></div>
-        <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE</div><div class="value" id="challengeCurrent">$0.00</div></div>
+        <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE <span id="syncCheck" title="Compares this sprint's tracked balance against your main dashboard's real Current Balance">$0.00</span></div><div class="value" id="challengeCurrent">$0.00</div></div>
         <div class="metric-card purple"><div class="icon">▣</div><div class="label">TRADE PROGRESS</div><div class="value purple" id="challengeProgress">0 / 30</div></div>
         <div class="metric-card white"><div class="icon">⊕</div><div class="label">NET P&amp;L</div><div class="value" id="challengeNetPnl">$0.00</div></div>
         <div class="metric-card red"><div class="icon">⛨</div><div class="label">MAX RISK <span title="Locked when you started this sprint: under $100 = $20 flat, $100+ = 40% of that $100-tier. Stays fixed for all 30 trades — only changes on your next sprint.">ⓘ</span></div><div class="value" id="challengeMaxRisk">-$20.00</div></div>
@@ -636,6 +641,14 @@
       $("challengeProgress").textContent=`${entered.length} / 30`;
       $("challengeNetPnl").textContent=money(netPnl);
 
+      const dashboardBalance=Number($("currentBalance").textContent.replace(/[^0-9.\-]/g,""))||0;
+      const inSync=Math.abs(dashboardBalance-current)<0.005;
+      const syncEl=$("syncCheck");
+      syncEl.textContent=money(dashboardBalance);
+      syncEl.classList.remove("sync-match","sync-mismatch");
+      syncEl.classList.add(inSync?"sync-match":"sync-mismatch");
+      syncEl.title=inSync?"Matches your main dashboard's Current Balance — every trade is accounted for.":"Doesn't match your main dashboard's Current Balance — a trade may be missing or mistyped somewhere in this sprint.";
+
       let running=challenge.startingBalance,winPcts=[];
       entered.forEach(t=>{const p=Number(t.pnl);if(t.result==="WIN"&&running>0)winPcts.push(p/running);running+=p});
       const avgWinPct=winPcts.length?winPcts.reduce((a,b)=>a+b,0)/winPcts.length:SETTINGS.dailyTargetPct;
@@ -646,12 +659,15 @@
       const winsNeeded=computeWinsNeeded(current,entered.length);
       const remaining=30-entered.length;
       $("chWinsNeeded").textContent=remaining<=0?"—":(winsNeeded>=remaining&&winsNeeded>0?`${winsNeeded}*`:winsNeeded);
-      let statusLine;
-      if(remaining<=0)statusLine="🏁 Sprint Complete";
-      else if(winsNeeded===0)statusLine="🟢 Protected";
-      else if(winsNeeded===1)statusLine="🟡 1 Win Needed";
-      else if(winsNeeded===2)statusLine="🟠 2 Wins Needed";
-      else statusLine=`🔴 ${winsNeeded}${winsNeeded>=remaining?"+":""} Wins Needed`;
+      const winsNeededEl=$("chWinsNeeded");
+      winsNeededEl.classList.remove("wn-green","wn-yellow","wn-orange","wn-red");
+      let statusLine,tierCls;
+      if(remaining<=0){statusLine="🏁 Sprint Complete";tierCls="wn-green"}
+      else if(winsNeeded===0){statusLine="🟢 Protected";tierCls="wn-green"}
+      else if(winsNeeded===1){statusLine="🟡 1 Win Needed";tierCls="wn-yellow"}
+      else if(winsNeeded===2){statusLine="🟠 2 Wins Needed";tierCls="wn-orange"}
+      else{statusLine=`🔴 ${winsNeeded}${winsNeeded>=remaining?"+":""} Wins Needed`;tierCls="wn-red"}
+      winsNeededEl.classList.add(tierCls);
       $("chStatusLine").textContent=statusLine;
 
       renderChallengeBars();
