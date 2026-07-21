@@ -365,7 +365,7 @@
       me.forEach(([d,e])=>{const p=Number(e.pnl||0);if(p>0&&running>0)winPcts.push(p/running);running+=p});
       const avgWinPct=winPcts.length?winPcts.reduce((a,b)=>a+b,0)/winPcts.length:SETTINGS.dailyTargetPct;
       const gap=currentMonthlyStart-current;
-      const expectedWin=Math.max(currentMonthlyStart,0)*avgWinPct;
+      const expectedWin=Math.max(current,0)*avgWinPct;
       const daysNeeded=gap>0&&expectedWin>0?Math.ceil(gap/expectedWin):0;
       $("toBreakeven").textContent=money(Math.max(0,gap));
       $("expectedWinDisplay").textContent=money(expectedWin);
