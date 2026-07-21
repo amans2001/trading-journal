@@ -294,7 +294,7 @@
     const STORAGE_KEY="amanJournalIntegratedV1";
     const DEFAULT_SETTINGS={monthlyStart:47.91,dailyTargetPct:0.05,stopPct:0.12,withdrawPct:0.12,monthlyTargetMultiplier:1.60,withdrawals:0,wallet:0};
     const demo={};
-    const DISCIPLINE_TIER={"Perfect Day":"green","Stopped After 2 Trades":"green","Accepted the Loss":"green","Missed Setup":"orange","Early Exit":"orange","Forced Trade":"orange","Overtraded":"orange","Revenge Trading":"red","Broke Risk Rules":"red"};
+    const DISCIPLINE_TIER={"Perfect Day":"green","Stopped After 2 Trades":"green","Accepted the Loss":"green","Missed Setup":"orange","Early Exit":"orange","Forced Trade":"orange","Revenge Trading":"red","Broke Risk Rules":"red","Overtraded":"red"};
     let SETTINGS={...DEFAULT_SETTINGS};let weeklyOverrides={};let monthlyStartOverrides={};let currentMonthlyStart=DEFAULT_SETTINGS.monthlyStart;let currentMonthlyKey="";
     function computeMonthlyStart(y,m){
       const targetKey=`${y}-${m}`;
@@ -342,8 +342,11 @@
         b.dataset.date=k;b.innerHTML=`<span class="day-number">${d}</span><div class="day-content"></div>`;
         if(e){const p=Number(e.pnl||0),t=Number(e.trades||0),w=Number(e.wins||0),wr=t?w/t*100:0;b.classList.add(p>0?"profit":p<0?"loss":"breakeven");
           const pnlScore=p>0?1:p<0?-1:0;const tier=DISCIPLINE_TIER[e.discipline];let dayScore=pnlScore;
-          if(tier){dayScore=tier==="green"?1:tier==="red"?-1:-0.4;
-            b.insertAdjacentHTML("beforeend",`<span class="discipline ${tier}" title="${e.discipline}">${tier==="green"?"✓":tier==="orange"?"●":"✕"}</span>`)}
+          const bigLossThreshold=currentMonthlyStart*SETTINGS.stopPct;
+          const isHugeLoss=p<0&&Math.abs(p)>=bigLossThreshold;
+          if(tier){dayScore=isHugeLoss?-1:(tier==="green"?1:tier==="red"?-1:-0.4);
+            const badgeTitle=e.discipline+(isHugeLoss?" — loss too large to count as a good day, regardless of tag":"");
+            b.insertAdjacentHTML("beforeend",`<span class="discipline ${tier}" title="${badgeTitle}">${tier==="green"?"✓":tier==="orange"?"●":"✕"}</span>`)}
           dayScores.push({score:dayScore,weight:Math.abs(p)});
           b.querySelector(".day-content").innerHTML=`<div class="pnl">${money(p)}</div><div class="day-meta">${t} ${t===1?"trade":"trades"}<br>${wr.toFixed(1)}%</div>`;
           mp+=p;md++;mt+=t;mw+=w;weeks[wi].pnl+=p;weeks[wi].days++;weeks[wi].trades+=t;weeks[wi].wins+=w;if(e.discipline)weeks[wi].discipline.push(e.discipline)}
