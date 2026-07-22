@@ -135,10 +135,11 @@
     .rule-lock.unlocked{border-color:var(--green);background:rgba(57,230,124,.10);animation:none}
     .rule-lock.unlocked .rule-lock-title{color:var(--green)}
     .rule-lock.unlocked .rule-lock-hint{color:var(--green)}
-    .session-date-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 13px;margin-bottom:12px;border:1px solid var(--border);border-radius:11px;background:#07131d}
-    .session-date-bar label{margin:0;color:var(--cyan);font-size:12px;font-weight:800;white-space:nowrap}
-    .session-date-bar input[type=date]{width:auto;padding:6px 10px}
-    .session-date-hint{font-size:10.5px;color:#8ba3b4;flex:1;min-width:200px}
+    .session-date-bar{display:flex;align-items:center;gap:9px;padding:5px 11px;margin-bottom:8px;border:1px solid var(--border);border-radius:9px;background:#07131d}
+    .session-date-bar label{margin:0;color:var(--cyan);font-size:10.5px;font-weight:800;white-space:nowrap}
+    .session-date-bar input[type=date]{width:auto;padding:3px 8px;font-size:11px;border-radius:7px}
+    .session-auto-btn{padding:3px 8px;border:1px solid #ff9d3d;color:#ff9d3d;background:rgba(255,157,61,.08);border-radius:999px;font-size:9px;font-weight:700;cursor:pointer;white-space:nowrap}
+    .session-auto-btn:hover{background:rgba(255,157,61,.2)}
     @media(max-width:1250px){.top-grid{grid-template-columns:repeat(5,1fr)}.brand{grid-row:span 2}.main-grid{grid-template-columns:1fr}.left-stack{display:grid}.journal-table{min-height:205px}.right-stack{grid-template-columns:1fr 1fr}.graph-panel{grid-column:1/-1}}
     @media(max-width:850px){.top-grid{grid-template-columns:repeat(2,1fr)}.brand{grid-row:auto}.calendar-toolbar{grid-template-columns:1fr}.calendar-title{grid-row:1}.month-control,.month-stats{justify-self:center}.calendar-layout{grid-template-columns:1fr}.week-col{grid-column:1;grid-row:auto;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;row-gap:8px;padding-top:0}.right-stack{grid-template-columns:1fr}.graph-panel{grid-column:auto}.table-head,.week-row{grid-template-columns:80px 1.4fr 60px 80px}.table-head>*:nth-child(n+5),.week-row>*:nth-child(n+5){display:none}}
     @media(max-width:600px){.app{width:calc(100% - 10px);margin-top:5px}.top-grid{grid-template-columns:1fr 1fr}.metric-card{min-height:100px}.calendar-panel{padding:7px}.weekday-row,.calendar-grid{gap:2px}.weekday{font-size:9px}.day-card{min-height:74px;padding:4px;border-radius:8px}.day-content{height:65px}.pnl{font-size:11px}.day-meta{font-size:8px}.week-col{grid-template-columns:repeat(2,1fr)}.summary-grid{grid-template-columns:1fr}.summary-box{border-right:0;border-bottom:1px solid rgba(70,90,110,.25)}.side-summary{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
@@ -257,9 +258,9 @@
       <div class="challenge-grid">
         <section class="panel challenge-table-panel">
           <div class="session-date-bar">
-            <label for="challengeSessionDate">📅 Logging trades for:</label>
+            <label for="challengeSessionDate">📅 Date <span title="Auto-follows today. Set manually only when backfilling a past day's trades — it decides which day's 2-trade/one-win rule they count toward.">ⓘ</span></label>
             <input type="date" id="challengeSessionDate">
-            <span class="session-date-hint">Set this to the real date before backfilling a past day's trades — it decides which day's "2 trades / stop after win" count they belong to.</span>
+            <button class="session-auto-btn" id="resetSessionDateAuto" type="button" style="display:none" title="Clear the manual date and go back to auto-following today.">↺ auto</button>
           </div>
           <div class="rule-lock" id="challengeRuleLock" style="margin:0 0 12px">
             <div class="rule-lock-title">🚨 RULE BROKEN — ENTRIES LOCKED FOR THIS DATE</div>
@@ -744,8 +745,10 @@
     function todayStr(){return new Date().toISOString().slice(0,10)}
     function currentSessionDate(){return challenge.sessionDate||todayStr()}
     function syncSessionDateInput(){
+      if(!challenge.sessionDateManual)challenge.sessionDate=todayStr();
       if(!challenge.sessionDate)challenge.sessionDate=todayStr();
       if($("challengeSessionDate").value!==challenge.sessionDate)$("challengeSessionDate").value=challenge.sessionDate;
+      $("resetSessionDateAuto").style.display=challenge.sessionDateManual?"":"none";
     }
     function challengeTodayTrades(){
       const d=currentSessionDate();
@@ -785,8 +788,15 @@
     });
     $("challengeSessionDate").addEventListener("change",e=>{
       challenge.sessionDate=e.target.value||todayStr();
+      challenge.sessionDateManual=true;
       $("challengeOverrideReason").value="";
-      persistChallenge();checkChallengeLock();
+      persistChallenge();syncSessionDateInput();checkChallengeLock();
+    });
+    $("resetSessionDateAuto").addEventListener("click",()=>{
+      challenge.sessionDateManual=false;
+      challenge.sessionDate=todayStr();
+      $("challengeOverrideReason").value="";
+      persistChallenge();syncSessionDateInput();checkChallengeLock();
     });
 
     function showChallengeModal(){
@@ -809,7 +819,7 @@
     function startNewChallengeFlow(){
       if(enteredChallengeTrades().length&&!confirm("This will clear all 30 trade rows and start a fresh challenge. Continue?"))return;
       const snapshot=Number($("currentBalance").textContent.replace(/[^0-9.\-]/g,""))||0;
-      challenge={startingBalance:snapshot,maxRisk:tierMaxRisk(snapshot),trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:"",loggedDate:null})),_modalShown:false,overrideDate:null,sessionDate:todayStr()};
+      challenge={startingBalance:snapshot,maxRisk:tierMaxRisk(snapshot),trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:"",loggedDate:null})),_modalShown:false,overrideDate:null,sessionDate:todayStr(),sessionDateManual:false};
       $("challengeOverrideReason").value="";
       persistChallenge();renderChallengeFull();
     }
