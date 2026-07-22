@@ -123,7 +123,22 @@
     .modal-header{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid #203645}.modal-header h2{margin:0;font-size:19px}.close{width:34px;height:34px;border:1px solid var(--border);border-radius:10px;background:#0a1a25;color:white;cursor:pointer}
     .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:18px 20px}.field.full{grid-column:1/-1}label{display:block;margin-bottom:6px;color:#b9cad6;font-size:12px;font-weight:800}
     input,select,textarea{width:100%;border:1px solid #294254;border-radius:11px;background:#0a1924;color:white;padding:11px 12px;outline:none}textarea{min-height:90px;resize:vertical}input:focus,select:focus,textarea:focus{border-color:var(--cyan)}
-    .modal-actions{display:flex;justify-content:space-between;gap:10px;padding:0 20px 20px}.actions-right{display:flex;gap:10px}.save,.delete{padding:10px 17px;border-radius:11px;font-weight:900;cursor:pointer}.save{border:1px solid var(--cyan);background:var(--cyan);color:#001116}.delete{border:1px solid rgba(255,73,103,.45);background:rgba(255,73,103,.08);color:var(--red)}
+    .modal-actions{display:flex;justify-content:space-between;gap:10px;padding:0 20px 20px}.actions-right{display:flex;gap:10px}.save,.delete{padding:10px 17px;border-radius:11px;font-weight:900;cursor:pointer}.save{border:1px solid var(--cyan);background:var(--cyan);color:#001116}.save:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.4)}.delete{border:1px solid rgba(255,73,103,.45);background:rgba(255,73,103,.08);color:var(--red)}
+    .rule-lock{display:none;margin:0 20px 16px;padding:14px 16px;border:1.5px solid var(--red);border-radius:12px;background:rgba(255,73,103,.12);animation:lockPulse 1.8s ease-in-out infinite}
+    .rule-lock.active{display:block}
+    @keyframes lockPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,73,103,.35)}50%{box-shadow:0 0 0 6px rgba(255,73,103,0)}}
+    .rule-lock-title{color:var(--red);font-weight:900;font-size:13px;display:flex;align-items:center;gap:7px}
+    .rule-lock-msg{color:#ffd2da;font-size:12px;margin-top:6px;line-height:1.5}
+    .rule-lock textarea{margin-top:10px;min-height:56px;border-color:rgba(255,73,103,.5);background:#0a0f14}
+    .rule-lock textarea:focus{border-color:var(--red)}
+    .rule-lock-hint{font-size:10.5px;color:#ff9db0;margin-top:5px;font-weight:700}
+    .rule-lock.unlocked{border-color:var(--green);background:rgba(57,230,124,.10);animation:none}
+    .rule-lock.unlocked .rule-lock-title{color:var(--green)}
+    .rule-lock.unlocked .rule-lock-hint{color:var(--green)}
+    .session-date-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:9px 13px;margin-bottom:12px;border:1px solid var(--border);border-radius:11px;background:#07131d}
+    .session-date-bar label{margin:0;color:var(--cyan);font-size:12px;font-weight:800;white-space:nowrap}
+    .session-date-bar input[type=date]{width:auto;padding:6px 10px}
+    .session-date-hint{font-size:10.5px;color:#8ba3b4;flex:1;min-width:200px}
     @media(max-width:1250px){.top-grid{grid-template-columns:repeat(5,1fr)}.brand{grid-row:span 2}.main-grid{grid-template-columns:1fr}.left-stack{display:grid}.journal-table{min-height:205px}.right-stack{grid-template-columns:1fr 1fr}.graph-panel{grid-column:1/-1}}
     @media(max-width:850px){.top-grid{grid-template-columns:repeat(2,1fr)}.brand{grid-row:auto}.calendar-toolbar{grid-template-columns:1fr}.calendar-title{grid-row:1}.month-control,.month-stats{justify-self:center}.calendar-layout{grid-template-columns:1fr}.week-col{grid-column:1;grid-row:auto;grid-template-columns:repeat(3,1fr);grid-template-rows:auto;row-gap:8px;padding-top:0}.right-stack{grid-template-columns:1fr}.graph-panel{grid-column:auto}.table-head,.week-row{grid-template-columns:80px 1.4fr 60px 80px}.table-head>*:nth-child(n+5),.week-row>*:nth-child(n+5){display:none}}
     @media(max-width:600px){.app{width:calc(100% - 10px);margin-top:5px}.top-grid{grid-template-columns:1fr 1fr}.metric-card{min-height:100px}.calendar-panel{padding:7px}.weekday-row,.calendar-grid{gap:2px}.weekday{font-size:9px}.day-card{min-height:74px;padding:4px;border-radius:8px}.day-content{height:65px}.pnl{font-size:11px}.day-meta{font-size:8px}.week-col{grid-template-columns:repeat(2,1fr)}.summary-grid{grid-template-columns:1fr}.summary-box{border-right:0;border-bottom:1px solid rgba(70,90,110,.25)}.side-summary{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}}
@@ -241,6 +256,17 @@
 
       <div class="challenge-grid">
         <section class="panel challenge-table-panel">
+          <div class="session-date-bar">
+            <label for="challengeSessionDate">📅 Logging trades for:</label>
+            <input type="date" id="challengeSessionDate">
+            <span class="session-date-hint">Set this to the real date before backfilling a past day's trades — it decides which day's "2 trades / stop after win" count they belong to.</span>
+          </div>
+          <div class="rule-lock" id="challengeRuleLock" style="margin:0 0 12px">
+            <div class="rule-lock-title">🚨 RULE BROKEN — ENTRIES LOCKED FOR THIS DATE</div>
+            <div class="rule-lock-msg" id="challengeRuleLockMsg"></div>
+            <textarea id="challengeOverrideReason" placeholder="Why are you overriding this rule? (required to unlock further entries for this date)"></textarea>
+            <div class="rule-lock-hint" id="challengeRuleLockHint">New trade rows are locked until you write a reason above.</div>
+          </div>
           <div class="challenge-table-head">
             <div></div><div>#</div><div>W/L</div><div>ACTUAL P&amp;L</div><div>ACTUAL RISK</div><div>MAX RISK</div><div>TOOK +10?</div><div>ORIGINAL SL</div>
           </div>
@@ -284,8 +310,15 @@
       <div class="field"><label for="entryPnl">Daily P&amp;L ($)</label><input id="entryPnl" type="number" step="0.01" placeholder="e.g. 6.23"></div>
       <div class="field"><label for="entryTrades">Number of trades</label><input id="entryTrades" type="number" min="0" step="1" placeholder="e.g. 2"></div>
       <div class="field"><label for="entryWins">Winning trades</label><input id="entryWins" type="number" min="0" step="1" placeholder="e.g. 1"></div>
+      <div class="field full" id="winOrderField" style="display:none"><label for="winOrder">Which trade was the win?</label><select id="winOrder"><option value="second">Trade 2 (I stopped right after)</option><option value="first">Trade 1 (I kept trading after)</option></select></div>
       <div class="field"><label for="entryDiscipline">Discipline</label><select id="entryDiscipline"><option value="">Not recorded</option><option value="Perfect Day" style="color:#39e67c">Perfect Day</option><option value="Stopped After 2 Trades" style="color:#39e67c">Stopped After 2 Trades</option><option value="Accepted the Loss" style="color:#39e67c">Accepted the Loss</option><option value="Missed Setup" style="color:#ff9d3d">Missed Setup</option><option value="Early Exit" style="color:#ff9d3d">Early Exit</option><option value="Forced Trade" style="color:#ff9d3d">Forced Trade</option><option value="Revenge Trading" style="color:#ff4967">Revenge Trading</option><option value="Broke Risk Rules" style="color:#ff4967">Broke Risk Rules</option><option value="Overtraded" style="color:#ff4967">Overtraded</option></select></div>
       <div class="field full"><label for="entryNotes">Notes</label><textarea id="entryNotes" placeholder="Optional session note"></textarea></div>
+    </div>
+    <div class="rule-lock" id="ruleLock">
+      <div class="rule-lock-title">🚨 RULE BROKEN — SOFT LOCK ACTIVE</div>
+      <div class="rule-lock-msg" id="ruleLockMsg"></div>
+      <textarea id="overrideReason" placeholder="Why are you overriding this rule? (required to unlock Save)"></textarea>
+      <div class="rule-lock-hint" id="ruleLockHint">Save is locked until you write a reason above.</div>
     </div>
     <div class="modal-actions"><button class="delete" id="deleteEntry" type="button">Delete</button><div class="actions-right"><button class="btn" id="cancelDialog" type="button">Cancel</button><button class="save" id="saveEntry" type="button">Save day</button></div></div>
   </dialog>
@@ -467,9 +500,37 @@
           </div>`)
       })
     }
-    function openDialog(k){selected=k;const e=entries[k]||{};$("dialogTitle").textContent=entries[k]?"Edit trading day":"Add trading day";$("entryDate").value=k;$("entryPnl").value=e.pnl??"";$("entryTrades").value=e.trades??"";$("entryWins").value=e.wins??"";$("entryDiscipline").value=e.discipline??"";$("entryNotes").value=e.notes??"";$("deleteEntry").style.visibility=entries[k]?"visible":"hidden";$("entryDialog").showModal()}
-    function closeDialog(){selected=null;$("entryDialog").close()}
-    $("saveEntry").addEventListener("click",()=>{if(!selected)return;const t=Math.max(0,Number($("entryTrades").value||0)),w=Math.min(t,Math.max(0,Number($("entryWins").value||0)));entries[selected]={pnl:Number($("entryPnl").value||0),trades:t,wins:w,discipline:$("entryDiscipline").value,notes:$("entryNotes").value.trim()};persist();render();closeDialog()});
+    function ruleLockViolation(){
+      const t=Math.max(0,Number($("entryTrades").value||0)),w=Math.min(t,Math.max(0,Number($("entryWins").value||0)));
+      if(t>2)return `You've logged ${t} trades today. Your rule is 2 trades max — this looks like overtrading.`;
+      if(t===2&&w===2)return `Both trades today were wins — you should have stopped after the first one.`;
+      if(t===2&&w===1&&$("winOrder").value==="first")return `You won trade 1 but kept trading. Your rule is: one win stops the day.`;
+      return null;
+    }
+    function checkRuleLock(){
+      $("winOrderField").style.display=(Math.max(0,Number($("entryTrades").value||0))===2&&Math.max(0,Number($("entryWins").value||0))===1)?"":"none";
+      const msg=ruleLockViolation();
+      const reasonFilled=$("overrideReason").value.trim().length>=3;
+      $("ruleLock").classList.toggle("active",!!msg);
+      if(msg)$("ruleLockMsg").textContent=msg;
+      $("saveEntry").disabled=!!msg&&!reasonFilled;
+      $("ruleLockHint").textContent=reasonFilled?"Override reason recorded — Save unlocked.":"Save is locked until you write a reason above.";
+    }
+    ["entryTrades","entryWins"].forEach(id=>$(id).addEventListener("input",checkRuleLock));
+    $("winOrder").addEventListener("change",checkRuleLock);
+    $("overrideReason").addEventListener("input",checkRuleLock);
+    function openDialog(k){selected=k;const e=entries[k]||{};$("dialogTitle").textContent=entries[k]?"Edit trading day":"Add trading day";$("entryDate").value=k;$("entryPnl").value=e.pnl??"";$("entryTrades").value=e.trades??"";$("entryWins").value=e.wins??"";$("entryDiscipline").value=e.discipline??"";$("entryNotes").value=e.notes??"";$("overrideReason").value="";$("winOrder").value="second";$("deleteEntry").style.visibility=entries[k]?"visible":"hidden";checkRuleLock();$("entryDialog").showModal()}
+    function closeDialog(){selected=null;$("overrideReason").value="";$("ruleLock").classList.remove("active");$("saveEntry").disabled=false;$("entryDialog").close()}
+    $("saveEntry").addEventListener("click",()=>{
+      if(!selected)return;
+      if(ruleLockViolation()&&$("overrideReason").value.trim().length<3)return checkRuleLock();
+      const t=Math.max(0,Number($("entryTrades").value||0)),w=Math.min(t,Math.max(0,Number($("entryWins").value||0)));
+      let notes=$("entryNotes").value.trim();
+      const violation=ruleLockViolation();
+      if(violation){const reason=$("overrideReason").value.trim();notes=(notes?notes+"\n\n":"")+`⚠ OVERRIDE — ${violation} Reason given: "${reason}"`;}
+      entries[selected]={pnl:Number($("entryPnl").value||0),trades:t,wins:w,discipline:$("entryDiscipline").value,notes};
+      persist();render();closeDialog();
+    });
     $("deleteEntry").addEventListener("click",()=>{if(selected&&entries[selected]){delete entries[selected];persist();render();closeDialog()}});
     $("prevMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()-1,1);render()});$("nextMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()+1,1);render()});
     $("thisMonth").addEventListener("click",()=>{const d=new Date();currentMonth=new Date(d.getFullYear(),d.getMonth(),1);render()});$("closeDialog").addEventListener("click",closeDialog);$("cancelDialog").addEventListener("click",closeDialog);
@@ -679,7 +740,54 @@
       if(entered.length===30&&!challenge._modalShown){showChallengeModal()}
     }
 
-    function renderChallengeFull(){renderChallengeTable();renderChallengeStats()}
+    function renderChallengeFull(){renderChallengeTable();renderChallengeStats();syncSessionDateInput();checkChallengeLock()}
+    function todayStr(){return new Date().toISOString().slice(0,10)}
+    function currentSessionDate(){return challenge.sessionDate||todayStr()}
+    function syncSessionDateInput(){
+      if(!challenge.sessionDate)challenge.sessionDate=todayStr();
+      if($("challengeSessionDate").value!==challenge.sessionDate)$("challengeSessionDate").value=challenge.sessionDate;
+    }
+    function challengeTodayTrades(){
+      const d=currentSessionDate();
+      return challenge.trades.filter(t=>t.loggedDate===d&&(t.result==="WIN"||t.result==="LOSS"));
+    }
+    function challengeTodayViolation(){
+      const todays=challengeTodayTrades(); // already in chronological/row order
+      const t=todays.length,wins=todays.filter(x=>x.result==="WIN").length;
+      if(t>2)return `${t} trades logged for this date. Your rule is 2 trades max — this looks like overtrading.`;
+      if(t===2&&wins===2)return `Both trades logged for this date won — you should have stopped after the first win.`;
+      if(t===2&&wins===1&&todays[0].result==="WIN")return `You won the first trade on this date but kept trading. Your rule is: one win stops the day.`;
+      return null;
+    }
+    function checkChallengeLock(){
+      const msg=challengeTodayViolation();
+      const overriddenToday=challenge.overrideDate===currentSessionDate();
+      const reasonFilled=$("challengeOverrideReason").value.trim().length>=3;
+      const unlocked=overriddenToday||reasonFilled;
+      $("challengeRuleLock").classList.toggle("active",!!msg);
+      $("challengeRuleLock").classList.toggle("unlocked",!!msg&&unlocked);
+      if(msg)$("challengeRuleLockMsg").textContent=msg;
+      $("challengeRuleLockHint").textContent=!msg?"":(unlocked?"✅ Override recorded — new entries unlocked for this date.":"New trade rows are locked until you write a reason above.");
+      // grey out every not-yet-filled row's inputs while locked
+      document.querySelectorAll("#challengeRows .challenge-row").forEach(row=>{
+        const idx=Number(row.dataset.idx);
+        const isEmpty=!challenge.trades[idx].result;
+        const lockedNow=!!msg&&!unlocked&&isEmpty;
+        row.querySelectorAll("select,input").forEach(el=>{el.disabled=lockedNow});
+        row.style.opacity=lockedNow?"0.35":"";
+      });
+    }
+    $("challengeOverrideReason").addEventListener("input",()=>{
+      const reasonFilled=$("challengeOverrideReason").value.trim().length>=3;
+      if(reasonFilled&&challengeTodayViolation()){challenge.overrideDate=currentSessionDate();persistChallenge();}
+      else if(!reasonFilled&&challenge.overrideDate===currentSessionDate()){challenge.overrideDate=null;persistChallenge();}
+      checkChallengeLock();
+    });
+    $("challengeSessionDate").addEventListener("change",e=>{
+      challenge.sessionDate=e.target.value||todayStr();
+      $("challengeOverrideReason").value="";
+      persistChallenge();checkChallengeLock();
+    });
 
     function showChallengeModal(){
       const entered=enteredChallengeTrades();
@@ -701,7 +809,8 @@
     function startNewChallengeFlow(){
       if(enteredChallengeTrades().length&&!confirm("This will clear all 30 trade rows and start a fresh challenge. Continue?"))return;
       const snapshot=Number($("currentBalance").textContent.replace(/[^0-9.\-]/g,""))||0;
-      challenge={startingBalance:snapshot,maxRisk:tierMaxRisk(snapshot),trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:""})),_modalShown:false};
+      challenge={startingBalance:snapshot,maxRisk:tierMaxRisk(snapshot),trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:"",loggedDate:null})),_modalShown:false,overrideDate:null,sessionDate:todayStr()};
+      $("challengeOverrideReason").value="";
       persistChallenge();renderChallengeFull();
     }
 
@@ -720,7 +829,12 @@
     });
     $("challengeRows").addEventListener("change",e=>{
       const idx=e.target.dataset.idx;if(idx===undefined)return;
-      if(e.target.classList.contains("ch-result"))challenge.trades[idx].result=e.target.value;
+      if(e.target.classList.contains("ch-result")){
+        const wasEmpty=!challenge.trades[idx].result;
+        challenge.trades[idx].result=e.target.value;
+        if(wasEmpty&&e.target.value)challenge.trades[idx].loggedDate=currentSessionDate();
+        if(!e.target.value)challenge.trades[idx].loggedDate=null;
+      }
       if(e.target.classList.contains("ch-took10"))challenge.trades[idx].took10=e.target.value;
       if(e.target.classList.contains("ch-origsl"))challenge.trades[idx].originalSL=e.target.value;
       persistChallenge();renderChallengeFull();
