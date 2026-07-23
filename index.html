@@ -260,7 +260,7 @@
 
       <div class="challenge-stats">
         <div class="metric-card cyan"><div class="icon">$</div><button class="update-btn" id="updateChallengeStart" type="button">Update</button><div class="label">STARTING BALANCE</div><div class="value white" id="challengeStart">$0.00</div></div>
-        <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE <span id="syncCheck" title="Compares this sprint's tracked balance against your main dashboard's real Current Balance">$0.00</span></div><div class="value" id="challengeCurrent">$0.00</div></div>
+        <div class="metric-card green"><div class="icon">↗</div><div class="label">CURRENT BALANCE <span id="syncCheck" title="Compares this sprint's tracked balance against your main dashboard's real Current Balance">$0.00</span></div><div class="value" id="challengeCurrent">$0.00</div><div class="withdraw-note" id="challengeWithdrawNote" style="display:none;margin-top:4px"></div></div>
         <div class="metric-card purple"><div class="icon">▣</div><div class="label">TRADE PROGRESS</div><div class="value purple" id="challengeProgress">0 / 30</div></div>
         <div class="metric-card white"><div class="icon">⊕</div><div class="label">NET P&amp;L</div><div class="value" id="challengeNetPnl">$0.00</div></div>
         <div class="metric-card red"><div class="icon">⛨</div><button class="update-btn" id="updateChallengeMaxRisk" type="button">Update</button><div class="label">MAX RISK <span title="Auto-locked when you started this sprint. Use Update to manually override it mid-sprint if needed — it'll stay at whatever you set until your next sprint or another manual change.">ⓘ</span></div><div class="value" id="challengeMaxRisk">-$20.00</div></div>
@@ -502,7 +502,7 @@
       const list=withdrawals[currentMonthlyKey]||[];
       $("withdrawTitle").textContent=`Withdraw Wages — ${currentMonth.toLocaleDateString("en-NZ",{month:"long",year:"numeric"})}`;
       if(!list.length){$("withdrawList").innerHTML='<div class="withdraw-empty">No withdrawals logged for this month yet.</div>'}
-      else{$("withdrawList").innerHTML=list.map((w,i)=>`<div class="withdraw-row"><input type="number" step="0.01" min="0" value="${w.amount}" data-idx="${i}" class="wd-amount"><button class="wd-del" data-idx="${i}" type="button">🗑</button></div>`).join("")}
+      else{$("withdrawList").innerHTML=list.map((w,i)=>`<div class="withdraw-row"><input type="date" value="${w.date||todayStr()}" data-idx="${i}" class="wd-date"><input type="number" step="0.01" min="0" value="${w.amount}" data-idx="${i}" class="wd-amount"><button class="wd-del" data-idx="${i}" type="button">🗑</button></div>`).join("")}
       const total=monthWithdrawTotal(currentMonthlyKey);
       $("withdrawTotalLine").textContent=`Total withdrawn this month: ${money(total)}`;
       const monthPnlNow=monthEntries().reduce((s,[,e])=>s+Number(e.pnl||0),0);
@@ -517,14 +517,18 @@
       const n=Number($("withdrawAmount").value);
       if(!isFinite(n)||n<=0)return alert("Enter a valid positive amount.");
       if(!withdrawals[currentMonthlyKey])withdrawals[currentMonthlyKey]=[];
-      withdrawals[currentMonthlyKey].push({amount:n});
+      withdrawals[currentMonthlyKey].push({amount:n,date:todayStr()});
       persist();renderWithdrawList();
     });
     $("withdrawList").addEventListener("change",e=>{
-      if(!e.target.classList.contains("wd-amount"))return;
-      const idx=Number(e.target.dataset.idx),n=Number(e.target.value);
-      if(!isFinite(n)||n<0)return renderWithdrawList();
-      withdrawals[currentMonthlyKey][idx].amount=n;persist();renderWithdrawList();
+      const idx=Number(e.target.dataset.idx);
+      if(e.target.classList.contains("wd-amount")){
+        const n=Number(e.target.value);
+        if(!isFinite(n)||n<0)return renderWithdrawList();
+        withdrawals[currentMonthlyKey][idx].amount=n;persist();renderWithdrawList();
+      }else if(e.target.classList.contains("wd-date")){
+        withdrawals[currentMonthlyKey][idx].date=e.target.value||todayStr();persist();renderWithdrawList();
+      }
     });
     $("withdrawList").addEventListener("click",e=>{
       if(!e.target.classList.contains("wd-del"))return;
@@ -592,7 +596,7 @@
     $("deleteEntry").addEventListener("click",()=>{if(selected&&entries[selected]){delete entries[selected];persist();render();closeDialog()}});
     $("prevMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()-1,1);render()});$("nextMonth").addEventListener("click",()=>{currentMonth=new Date(currentMonth.getFullYear(),currentMonth.getMonth()+1,1);render()});
     $("thisMonth").addEventListener("click",()=>{const d=new Date();currentMonth=new Date(d.getFullYear(),d.getMonth(),1);render()});$("closeDialog").addEventListener("click",closeDialog);$("cancelDialog").addEventListener("click",closeDialog);
-    $("resetMonth").addEventListener("click",()=>{if(confirm("Delete all entries in the displayed month?")){monthEntries().forEach(([d])=>delete entries[d]);persist();render()}});
+    $("resetMonth").addEventListener("click",()=>{if(confirm("Delete all entries AND withdrawal records for the displayed month?")){monthEntries().forEach(([d])=>delete entries[d]);delete withdrawals[currentMonthlyKey];persist();render()}});
     $("resetMonthlyAuto").addEventListener("click",()=>{if(!confirm("Clear the manual value for this month and go back to automatic carry-forward?"))return;delete monthlyStartOverrides[currentMonthlyKey];persist();render()});
     $("resetWeeklyAuto").addEventListener("click",()=>{if(!confirm("Clear the manual value for this week and go back to automatic?"))return;delete weeklyOverrides[currentWeeklyKey];persist();render()});
     $("updateMonthly").addEventListener("click",()=>{const v=prompt("Set this month's start balance ($):",currentMonthlyStart.toFixed(2));if(v===null)return;const n=Number(v);if(!isFinite(n)||n<0)return alert("Enter a valid positive number.");monthlyStartOverrides[currentMonthlyKey]=n;persist();render()});
@@ -672,6 +676,7 @@
       }catch{return {startingBalance:0,maxRisk:-20,trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:""})),_modalShown:false}}
     }
     let challenge=loadChallenge();
+    if(!challenge.startedAt){challenge.startedAt=todayStr();persistChallenge()}
     function persistChallenge(){localStorage.setItem(CHALLENGE_KEY,JSON.stringify(challenge))}
     function enteredChallengeTrades(){return challenge.trades.filter(t=>t.result==="WIN"||t.result==="LOSS")}
 
@@ -755,12 +760,21 @@
       el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line class="pnl-baseline" x1="${padL}" y1="${baselineY.toFixed(1)}" x2="${W-padR}" y2="${baselineY.toFixed(1)}"/>${bars}</svg>`;
     }
 
+    function challengeWithdrawalsSinceStart(){
+      const since=challenge.startedAt||todayStr();
+      let total=0;
+      Object.values(withdrawals).forEach(list=>{(list||[]).forEach(w=>{if((w.date||"")>=since)total+=Number(w.amount||0)})});
+      return total;
+    }
     function renderChallengeStats(){
       const entered=enteredChallengeTrades();
       const netPnl=entered.reduce((s,t)=>s+Number(t.pnl||0),0);
-      const current=challenge.startingBalance+netPnl;
+      const withdrawnSinceStart=challengeWithdrawalsSinceStart();
+      const current=challenge.startingBalance+netPnl-withdrawnSinceStart;
       $("challengeStart").textContent=money(challenge.startingBalance);
       $("challengeCurrent").textContent=money(current);
+      $("challengeWithdrawNote").style.display=withdrawnSinceStart>0.005?"block":"none";
+      if(withdrawnSinceStart>0.005)$("challengeWithdrawNote").textContent=`− ${money(withdrawnSinceStart)} withdrawn since sprint start`;
       $("challengeProgress").textContent=`${entered.length} / 30`;
       $("challengeNetPnl").textContent=money(netPnl);
 
@@ -876,7 +890,7 @@
     function startNewChallengeFlow(){
       if(enteredChallengeTrades().length&&!confirm("This will clear all 30 trade rows and start a fresh challenge. Continue?"))return;
       const snapshot=Number($("currentBalance").textContent.replace(/[^0-9.\-]/g,""))||0;
-      challenge={startingBalance:snapshot,maxRisk:tierMaxRisk(snapshot),trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:"",loggedDate:null})),_modalShown:false,overrideDate:null,sessionDate:todayStr(),sessionDateManual:false};
+      challenge={startingBalance:snapshot,maxRisk:tierMaxRisk(snapshot),trades:Array.from({length:30},()=>({result:"",pnl:null,risk:null,took10:"",originalSL:"",loggedDate:null})),_modalShown:false,overrideDate:null,sessionDate:todayStr(),sessionDateManual:false,startedAt:todayStr()};
       $("challengeOverrideReason").value="";
       persistChallenge();renderChallengeFull();
     }
