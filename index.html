@@ -111,7 +111,18 @@
     .recovery-box-label{font-size:9.5px;font-weight:800;color:#87b6d7;letter-spacing:.2px}.recovery-box-value{font-size:16px;font-weight:800;margin-top:6px}
     .recovery-status{margin-top:10px;text-align:center;font-weight:900;font-size:13px}
     .tilt-track{height:24px;margin:10px 0 5px;border-radius:7px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;background:#15202b;transition:grid-template-columns .35s ease}.tilt-red{background:linear-gradient(90deg,#ff365d,#ff4967)}.tilt-green{background:linear-gradient(90deg,#3ed9a0,#39e67c)}.tilt-status{text-align:center;font-weight:900}
-    .summary-grid{display:grid;grid-template-columns:1fr 1.15fr .85fr;min-width:0;overflow:hidden}.summary-box{min-width:0;min-height:108px;padding:17px;text-align:center;border-right:1px solid rgba(70,90,110,.25);display:flex;flex-direction:column;justify-content:center;overflow:hidden}.summary-box:last-child{border-right:0}.summary-label{font-size:12px;font-weight:900}.summary-value{font-size:26px;font-weight:900;margin-top:8px}.summary-box.highlight{background:#241c08;border-color:rgba(255,210,30,.25)}.summary-foot{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(70,90,110,.25)}.summary-foot>div{padding:14px;text-align:center}.summary-foot small{display:block;color:var(--cyan);font-weight:900}.summary-foot strong{display:block;margin-top:7px}
+    .summary-grid{display:grid;grid-template-columns:1fr 1.15fr .85fr;min-width:0;overflow:hidden}.summary-box{min-width:0;min-height:108px;padding:17px;text-align:center;border-right:1px solid rgba(70,90,110,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;overflow:hidden;position:relative}.summary-box:last-child{border-right:0}.summary-label{font-size:12px;font-weight:900}.summary-value{font-size:26px;font-weight:900;margin-top:3px}.summary-box.highlight{background:#241c08;border-color:rgba(255,210,30,.25)}.summary-foot{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid rgba(70,90,110,.25)}.summary-foot>div{padding:14px;text-align:center}.summary-foot small{display:block;color:var(--cyan);font-weight:900}.summary-foot strong{display:block;margin-top:7px}
+    .withdraw-trigger{padding:3px 12px;border:1px solid var(--green);color:var(--green);background:rgba(57,230,124,.08);border-radius:999px;font-size:10px;font-weight:800;cursor:pointer;margin-top:2px}
+    .withdraw-note{font-size:10px;color:var(--muted);font-weight:700;cursor:pointer;text-decoration:underline;text-decoration-style:dotted}
+    .withdraw-note:hover{color:var(--green)}
+    .withdraw-row{display:flex;align-items:center;gap:8px;padding:9px 20px;border-bottom:1px solid rgba(70,90,110,.2)}
+    .withdraw-row input{flex:1;padding:8px 10px;font-size:13px}
+    .withdraw-row .wd-del{padding:6px 10px;border:1px solid rgba(255,73,103,.4);color:var(--red);background:rgba(255,73,103,.08);border-radius:8px;cursor:pointer;font-size:12px;font-weight:800}
+    .withdraw-empty{padding:16px 20px;color:var(--muted);font-size:12px;text-align:center}
+    .withdraw-add-row{display:flex;gap:8px;padding:14px 20px;border-top:1px solid rgba(70,90,110,.3)}
+    .withdraw-add-row input{flex:1}
+    .withdraw-add-row button{padding:9px 16px;border:1px solid var(--green);color:var(--green);background:rgba(57,230,124,.08);border-radius:10px;font-weight:800;cursor:pointer;white-space:nowrap}
+    .withdraw-total{padding:12px 20px;font-size:12px;color:var(--muted);font-weight:700;border-top:1px solid rgba(70,90,110,.2)}
     
     .performance-panel{padding:12px}
 
@@ -218,7 +229,7 @@
           <div class="summary-grid">
             <div class="summary-box"><div class="summary-label cyan">WEEKLY GOAL</div><div class="summary-value cyan">15%</div></div>
             <div class="summary-box highlight"><div class="summary-label gold">MONTHLY TARGET</div><div class="summary-value gold" id="monthlyTarget">$76.66</div></div>
-            <div class="summary-box"><div class="summary-label green">WITHDRAW WAGES</div><div class="summary-value green" id="withdrawWages">$0.00</div></div>
+            <div class="summary-box"><div class="summary-label green">WITHDRAW WAGES</div><div class="summary-value green" id="withdrawWages">$0.00</div><button class="withdraw-trigger" id="openWithdraw" type="button">Withdraw</button><div class="withdraw-note" id="withdrawNote" style="display:none"></div></div>
           </div>
           <div class="summary-foot">
             <div><small>FROM → TO</small><strong id="fromTo">$47.91 → $47.91</strong></div>
@@ -304,6 +315,12 @@
     </dialog>
   </main>
 
+  <dialog id="withdrawDialog">
+    <div class="modal-actions" style="padding:18px 20px 0"><h2 id="withdrawTitle" style="font-size:16px;font-weight:900">Withdraw Wages</h2><button class="btn" id="closeWithdrawX" type="button">✕</button></div>
+    <div id="withdrawList"></div>
+    <div class="withdraw-add-row"><input id="withdrawAmount" type="number" step="0.01" min="0" placeholder="Amount ($)"><button id="addWithdraw" type="button">+ Add</button></div>
+    <div class="withdraw-total" id="withdrawTotalLine"></div>
+  </dialog>
   <dialog id="entryDialog">
     <div class="modal-header"><h2 id="dialogTitle">Add trading day</h2><button class="close" id="closeDialog" type="button">✕</button></div>
     <div class="form-grid">
@@ -326,10 +343,11 @@
 
   <script>
     const STORAGE_KEY="amanJournalIntegratedV1";
-    const DEFAULT_SETTINGS={monthlyStart:47.91,dailyTargetPct:0.05,stopPct:0.12,withdrawPct:0.12,monthlyTargetMultiplier:1.60,withdrawals:0,wallet:0};
+    const DEFAULT_SETTINGS={monthlyStart:47.91,dailyTargetPct:0.05,stopPct:0.12,withdrawPct:0.12,monthlyTargetMultiplier:1.60,wallet:0};
     const demo={};
     const DISCIPLINE_TIER={"Perfect Day":"green","Stopped After 2 Trades":"green","Accepted the Loss":"green","Missed Setup":"orange","Early Entry":"orange","Early Exit":"orange","Forced Trade":"orange","Revenge Trading":"red","Broke Risk Rules":"red","Overtraded":"red"};
-    let SETTINGS={...DEFAULT_SETTINGS};let weeklyOverrides={};let monthlyStartOverrides={};let currentMonthlyStart=DEFAULT_SETTINGS.monthlyStart;let currentMonthlyKey="";
+    let SETTINGS={...DEFAULT_SETTINGS};let weeklyOverrides={};let monthlyStartOverrides={};let withdrawals={};let currentMonthlyStart=DEFAULT_SETTINGS.monthlyStart;let currentMonthlyKey="";
+    function monthWithdrawTotal(k){return (withdrawals[k]||[]).reduce((s,w)=>s+Number(w.amount||0),0)}
     function computeMonthlyStart(y,m){
       const targetKey=`${y}-${m}`;
       if(monthlyStartOverrides[targetKey]!==undefined)return monthlyStartOverrides[targetKey];
@@ -342,7 +360,7 @@
       while(!(wy===y&&wm===m)){
         const prefix=`${wy}-${String(wm+1).padStart(2,"0")}`;
         const monthPnl=Object.entries(entries).filter(([d])=>d.startsWith(prefix)).reduce((s,[,e])=>s+Number(e.pnl||0),0);
-        running+=monthPnl;wm++;if(wm>11){wm=0;wy++}}
+        running+=monthPnl-monthWithdrawTotal(`${wy}-${wm}`);wm++;if(wm>11){wm=0;wy++}}
       return running;
     }
     let entries=load();let currentMonth=new Date(2026,6,1);let selected=null;
@@ -352,9 +370,10 @@
           if(parsed.weeklyOverrides)weeklyOverrides=parsed.weeklyOverrides;
           else if(parsed.weeklyOverride)weeklyOverrides={[parsed.weeklyOverride.weekKey]:parsed.weeklyOverride.value};
           if(parsed.monthlyStartOverrides)monthlyStartOverrides=parsed.monthlyStartOverrides;
+          if(parsed.withdrawals)withdrawals=parsed.withdrawals;
           return parsed.entries}
         return parsed}catch{return {...demo}}}
-    function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify({entries,settings:SETTINGS,weeklyOverrides,monthlyStartOverrides}));if(typeof syncToSheet==="function")syncToSheet(false)}
+    function persist(){localStorage.setItem(STORAGE_KEY,JSON.stringify({entries,settings:SETTINGS,weeklyOverrides,monthlyStartOverrides,withdrawals}));if(typeof syncToSheet==="function")syncToSheet(false)}
     function key(y,m,d){return `${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`}
     function money(v){const a=Math.abs(v);const f=a>=1000?`$${(a/1000).toFixed(a%1000===0?0:2)}K`:`$${a.toFixed(2).replace(/\.00$/,"")}`;return v<0?`-${f}`:f}
     function monthEntries(){const p=`${currentMonth.getFullYear()}-${String(currentMonth.getMonth()+1).padStart(2,"0")}`;return Object.entries(entries).filter(([d])=>d.startsWith(p)).sort((a,b)=>a[0].localeCompare(b[0]))}
@@ -392,7 +411,7 @@
       const totalWeight=recentScores.reduce((s,d)=>s+d.weight,0);
       const weightedTilt=totalWeight>0?recentScores.reduce((s,d)=>s+d.score*d.weight,0)/totalWeight:0;
       renderTilt(weightedTilt,recentScores.length);
-      renderDashboard(mp,mt,mw,weeks,y,m);renderWeeklyRows(weeks,y,m,first,dim,weekStarts);renderEquityChart();renderPnlBars();renderRecoveryStatus(currentMonthlyStart+mp-SETTINGS.withdrawals);
+      renderDashboard(mp,mt,mw,weeks,y,m);renderWeeklyRows(weeks,y,m,first,dim,weekStarts);renderEquityChart();renderPnlBars();renderRecoveryStatus(currentMonthlyStart+mp-monthWithdrawTotal(currentMonthlyKey));
     }
     function renderRecoveryStatus(current){
       const me=monthEntries();let running=currentMonthlyStart,winPcts=[];
@@ -452,7 +471,7 @@
     }
     let currentWeeklyKey=null;
     function renderDashboard(monthPnl,trades,wins,weeks,y,m){
-      const current=currentMonthlyStart+monthPnl-SETTINGS.withdrawals;
+      const current=currentMonthlyStart+monthPnl-monthWithdrawTotal(currentMonthlyKey);
       const winrate=trades?wins/trades*100:0;const monthPct=currentMonthlyStart?monthPnl/currentMonthlyStart*100:0;
       let activeWeekIdx=-1;
       const today=new Date();
@@ -471,9 +490,47 @@
       $("monthlyStart").textContent=money(currentMonthlyStart);$("weeklyStart").textContent=money(weeklyStart);$("currentBalance").textContent=money(current);
       $("todayTarget").textContent=money(current*(1+SETTINGS.dailyTargetPct));$("dailyProfit").textContent=money(current*SETTINGS.dailyTargetPct);$("grossPnl").textContent=money(monthPnl);
       $("stopTarget").textContent=money(current*(1-SETTINGS.stopPct));$("monthlyWinrate").textContent=`${winrate.toFixed(2)}%`;$("monthlyPercentage").textContent=`${monthPct.toFixed(2)}%`;
-      $("monthlyTarget").textContent=money(currentMonthlyStart*SETTINGS.monthlyTargetMultiplier);$("withdrawWages").textContent=money(monthPnl*SETTINGS.withdrawPct);
+      $("monthlyTarget").textContent=money(currentMonthlyStart*SETTINGS.monthlyTargetMultiplier);
+      const withdrawnSoFar=monthWithdrawTotal(currentMonthlyKey),suggested=Math.max(0,monthPnl*SETTINGS.withdrawPct-withdrawnSoFar);
+      $("withdrawWages").textContent=money(suggested);
+      const wCount=(withdrawals[currentMonthlyKey]||[]).length;
+      $("withdrawNote").style.display=wCount?"block":"none";
+      if(wCount)$("withdrawNote").textContent=`${money(withdrawnSoFar)} withdrawn (${wCount}) →`;
       $("fromTo").textContent=`${money(currentMonthlyStart)} → ${money(current)}`;$("summaryPnl").textContent=money(monthPnl);
     }
+    function renderWithdrawList(){
+      const list=withdrawals[currentMonthlyKey]||[];
+      $("withdrawTitle").textContent=`Withdraw Wages — ${currentMonth.toLocaleDateString("en-NZ",{month:"long",year:"numeric"})}`;
+      if(!list.length){$("withdrawList").innerHTML='<div class="withdraw-empty">No withdrawals logged for this month yet.</div>'}
+      else{$("withdrawList").innerHTML=list.map((w,i)=>`<div class="withdraw-row"><input type="number" step="0.01" min="0" value="${w.amount}" data-idx="${i}" class="wd-amount"><button class="wd-del" data-idx="${i}" type="button">🗑</button></div>`).join("")}
+      const total=monthWithdrawTotal(currentMonthlyKey);
+      $("withdrawTotalLine").textContent=`Total withdrawn this month: ${money(total)}`;
+      const monthPnlNow=monthEntries().reduce((s,[,e])=>s+Number(e.pnl||0),0);
+      $("withdrawAmount").value=Math.max(0,monthPnlNow*SETTINGS.withdrawPct-total).toFixed(2);
+    }
+    $("openWithdraw").addEventListener("click",()=>{renderWithdrawList();$("withdrawDialog").showModal()});
+    $("withdrawNote").addEventListener("click",()=>{renderWithdrawList();$("withdrawDialog").showModal()});
+    $("closeWithdrawX").addEventListener("click",()=>{$("withdrawDialog").close()});
+    $("withdrawDialog").addEventListener("click",e=>{if(e.target===$("withdrawDialog")){$("withdrawDialog").close()}});
+    $("withdrawDialog").addEventListener("close",()=>render());
+    $("addWithdraw").addEventListener("click",()=>{
+      const n=Number($("withdrawAmount").value);
+      if(!isFinite(n)||n<=0)return alert("Enter a valid positive amount.");
+      if(!withdrawals[currentMonthlyKey])withdrawals[currentMonthlyKey]=[];
+      withdrawals[currentMonthlyKey].push({amount:n});
+      persist();renderWithdrawList();
+    });
+    $("withdrawList").addEventListener("change",e=>{
+      if(!e.target.classList.contains("wd-amount"))return;
+      const idx=Number(e.target.dataset.idx),n=Number(e.target.value);
+      if(!isFinite(n)||n<0)return renderWithdrawList();
+      withdrawals[currentMonthlyKey][idx].amount=n;persist();renderWithdrawList();
+    });
+    $("withdrawList").addEventListener("click",e=>{
+      if(!e.target.classList.contains("wd-del"))return;
+      const idx=Number(e.target.dataset.idx);
+      withdrawals[currentMonthlyKey].splice(idx,1);persist();renderWithdrawList();
+    });
     function renderWeeklyRows(weeks,y,m,first,dim,weekStarts){
       $("weeklyRows").innerHTML="";
       $("weeklyRows").style.setProperty("--table-rows",weeks.length);
