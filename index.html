@@ -312,7 +312,7 @@
       <div class="field"><label for="entryTrades">Number of trades</label><input id="entryTrades" type="number" min="0" step="1" placeholder="e.g. 2"></div>
       <div class="field"><label for="entryWins">Winning trades</label><input id="entryWins" type="number" min="0" step="1" placeholder="e.g. 1"></div>
       <div class="field full" id="winOrderField" style="display:none"><label for="winOrder">Which trade was the win?</label><select id="winOrder"><option value="second">Trade 2 (I stopped right after)</option><option value="first">Trade 1 (I kept trading after)</option></select></div>
-      <div class="field"><label for="entryDiscipline">Discipline</label><select id="entryDiscipline"><option value="">Not recorded</option><option value="Perfect Day" style="color:#39e67c">Perfect Day</option><option value="Stopped After 2 Trades" style="color:#39e67c">Stopped After 2 Trades</option><option value="Accepted the Loss" style="color:#39e67c">Accepted the Loss</option><option value="Missed Setup" style="color:#ff9d3d">Missed Setup</option><option value="Early Exit" style="color:#ff9d3d">Early Exit</option><option value="Forced Trade" style="color:#ff9d3d">Forced Trade</option><option value="Revenge Trading" style="color:#ff4967">Revenge Trading</option><option value="Broke Risk Rules" style="color:#ff4967">Broke Risk Rules</option><option value="Overtraded" style="color:#ff4967">Overtraded</option></select></div>
+      <div class="field"><label for="entryDiscipline">Discipline</label><select id="entryDiscipline"><option value="">Not recorded</option><option value="Perfect Day" style="color:#39e67c">Perfect Day</option><option value="Stopped After 2 Trades" style="color:#39e67c">Stopped After 2 Trades</option><option value="Accepted the Loss" style="color:#39e67c">Accepted the Loss</option><option value="Missed Setup" style="color:#ff9d3d">Missed Setup</option><option value="Early Entry" style="color:#ff9d3d">Early Entry</option><option value="Early Exit" style="color:#ff9d3d">Early Exit</option><option value="Forced Trade" style="color:#ff9d3d">Forced Trade</option><option value="Revenge Trading" style="color:#ff4967">Revenge Trading</option><option value="Broke Risk Rules" style="color:#ff4967">Broke Risk Rules</option><option value="Overtraded" style="color:#ff4967">Overtraded</option></select></div>
       <div class="field full"><label for="entryNotes">Notes</label><textarea id="entryNotes" placeholder="Optional session note"></textarea></div>
     </div>
     <div class="rule-lock" id="ruleLock">
@@ -328,7 +328,7 @@
     const STORAGE_KEY="amanJournalIntegratedV1";
     const DEFAULT_SETTINGS={monthlyStart:47.91,dailyTargetPct:0.05,stopPct:0.12,withdrawPct:0.12,monthlyTargetMultiplier:1.60,withdrawals:0,wallet:0};
     const demo={};
-    const DISCIPLINE_TIER={"Perfect Day":"green","Stopped After 2 Trades":"green","Accepted the Loss":"green","Missed Setup":"orange","Early Exit":"orange","Forced Trade":"orange","Revenge Trading":"red","Broke Risk Rules":"red","Overtraded":"red"};
+    const DISCIPLINE_TIER={"Perfect Day":"green","Stopped After 2 Trades":"green","Accepted the Loss":"green","Missed Setup":"orange","Early Entry":"orange","Early Exit":"orange","Forced Trade":"orange","Revenge Trading":"red","Broke Risk Rules":"red","Overtraded":"red"};
     let SETTINGS={...DEFAULT_SETTINGS};let weeklyOverrides={};let monthlyStartOverrides={};let currentMonthlyStart=DEFAULT_SETTINGS.monthlyStart;let currentMonthlyKey="";
     function computeMonthlyStart(y,m){
       const targetKey=`${y}-${m}`;
