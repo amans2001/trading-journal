@@ -603,7 +603,7 @@
     $("updateWeekly").addEventListener("click",()=>{const cur=$("weeklyStart").textContent.replace(/[^0-9.\-]/g,"");const v=prompt("Set this week's start balance ($):",cur);if(v===null)return;const n=Number(v);if(!isFinite(n)||n<0)return alert("Enter a valid positive number.");weeklyOverrides[currentWeeklyKey]=n;persist();render()});
     // ---- Backup to file (always available, no setup needed) ----
     $("exportBtn").addEventListener("click",()=>{
-      const payload={entries,settings:SETTINGS,weeklyOverrides,exportedAt:new Date().toISOString()};
+      const payload={entries,settings:SETTINGS,weeklyOverrides,monthlyStartOverrides,withdrawals,exportedAt:new Date().toISOString()};
       const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");
@@ -620,7 +620,7 @@
           const data=JSON.parse(reader.result);
           if(!data||typeof data.entries!=="object")throw new Error("bad file");
           if(!confirm("This will replace all your current data with this backup file. Continue?"))return;
-          entries=data.entries||{};SETTINGS={...DEFAULT_SETTINGS,...(data.settings||{})};weeklyOverrides=data.weeklyOverrides||{};
+          entries=data.entries||{};SETTINGS={...DEFAULT_SETTINGS,...(data.settings||{})};weeklyOverrides=data.weeklyOverrides||{};monthlyStartOverrides=data.monthlyStartOverrides||{};withdrawals=data.withdrawals||{};
           persist();render();alert("Backup restored.");
         }catch{alert("Couldn't read this file — make sure it's a backup file downloaded from this journal.")}
       };
@@ -633,7 +633,7 @@
     async function syncToSheet(manual){
       if(!sheetUrl)return;
       try{
-        await fetch(sheetUrl,{method:"POST",body:JSON.stringify({entries,settings:SETTINGS,weeklyOverrides}),headers:{"Content-Type":"text/plain;charset=utf-8"}});
+        await fetch(sheetUrl,{method:"POST",body:JSON.stringify({entries,settings:SETTINGS,weeklyOverrides,monthlyStartOverrides,withdrawals}),headers:{"Content-Type":"text/plain;charset=utf-8"}});
         if(manual)alert("Synced to Google Sheet.");
       }catch{if(manual)alert("Couldn't reach the Google Sheet right now. Your data is still saved safely on this device — try again later.")}
     }
@@ -642,7 +642,7 @@
       if(!confirm("This will replace your current data with what's saved in the Google Sheet. Continue?"))return;
       try{
         const res=await fetch(sheetUrl);const data=await res.json();
-        entries=data.entries||{};SETTINGS={...DEFAULT_SETTINGS,...(data.settings||{})};weeklyOverrides=data.weeklyOverrides||{};
+        entries=data.entries||{};SETTINGS={...DEFAULT_SETTINGS,...(data.settings||{})};weeklyOverrides=data.weeklyOverrides||{};monthlyStartOverrides=data.monthlyStartOverrides||{};withdrawals=data.withdrawals||{};
         persist();render();alert("Restored from Google Sheet.");
       }catch{alert("Couldn't reach the Google Sheet right now.")}
     }
