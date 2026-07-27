@@ -104,6 +104,9 @@
     .challenge-total-row>div:first-child{grid-column:1/4;color:#8ba3b4}
     .challenge-total-row>div:nth-child(2){grid-column:4;font-size:13px}
     .challenge-total-row .positive{color:var(--green)}.challenge-total-row .negative{color:var(--red)}
+    .split-hypo{grid-column:5/9;text-align:right;font-size:10.5px;color:var(--muted);align-self:center;font-weight:800;cursor:help}
+    .split-hypo b{color:var(--cyan);font-weight:900;font-size:13px}
+    .split-hypo .positive{color:var(--green)}.split-hypo .negative{color:var(--red)}
     .modal-body{padding:18px 20px;font-size:13.5px;line-height:1.8}.modal-body p{margin:0 0 4px}
     .modal-footer{display:flex;justify-content:flex-end;gap:10px;padding:0 20px 20px}
     .recovery-section{margin-top:16px;padding-top:14px;border-top:1px solid rgba(70,90,110,.25)}.recovery-label{font-size:12px;font-weight:900;color:var(--purple);margin-bottom:10px}
@@ -283,7 +286,7 @@
             <div></div><div>#</div><div>W/L</div><div>ACTUAL P&amp;L</div><div>ACTUAL RISK</div><div>MAX RISK</div><div>TOOK +10?</div><div>ORIGINAL SL</div>
           </div>
           <div class="challenge-table-body" id="challengeRows"></div>
-          <div class="challenge-total-row"><div>TOTAL</div><div id="challengeTotalPnl">$0.00</div></div>
+          <div class="challenge-total-row"><div>TOTAL</div><div id="challengeTotalPnl">$0.00</div><div class="split-hypo" id="splitHypoStat" title="If every trade had been split into 2 equal positions with the runner moved to breakeven after +10 pips, using this sprint's locked Max Risk as the full-stop value: SL trades lose the full Max Risk, TP+10 trades net ⅓ of Max Risk, TP+20 trades net the full Max Risk as profit."></div></div>
         </section>
 
         <div class="challenge-side">
@@ -723,9 +726,24 @@
           </select>
         </div>`;
       }).join("");
+      renderSplitHypo(entered);
+    }
+    function splitExitStats(entered){
       const netPnl=entered.reduce((s,t)=>s+Number(t.pnl||0),0);
+      const maxRiskAbs=Math.abs(Number(challenge.maxRisk||0));
+      const splitHypo=entered.reduce((s,t)=>{
+        if(t.took10==="SL")return s-maxRiskAbs;
+        if(t.took10==="TP10")return s+maxRiskAbs/3;
+        if(t.took10==="TP20")return s+maxRiskAbs;
+        return s;
+      },0);
+      return {netPnl,splitHypo,diff:splitHypo-netPnl};
+    }
+    function renderSplitHypo(entered){
+      const {netPnl,splitHypo,diff}=splitExitStats(entered);
       $("challengeTotalPnl").textContent=money(netPnl);
       $("challengeTotalPnl").className=netPnl>0?"positive":netPnl<0?"negative":"";
+      $("splitHypoStat").innerHTML=entered.length?`Split-exit: <b>${money(splitHypo)}</b> &nbsp;(<span class="${diff>0?"positive":diff<0?"negative":""}">${diff>=0?"+":""}${money(diff)}</span>)`:"";
     }
 
     // Worst-case "don't end up underwater" calculation: if every remaining trade were a max loss
@@ -904,9 +922,7 @@
       }
       if(e.target.classList.contains("ch-risk"))challenge.trades[idx].risk=e.target.value===""?null:Number(e.target.value);
       persistChallenge();renderChallengeStats();
-      const netPnl=enteredChallengeTrades().reduce((s,t)=>s+Number(t.pnl||0),0);
-      $("challengeTotalPnl").textContent=money(netPnl);
-      $("challengeTotalPnl").className=netPnl>0?"positive":netPnl<0?"negative":"";
+      renderSplitHypo(enteredChallengeTrades());
     });
     $("challengeRows").addEventListener("change",e=>{
       const idx=e.target.dataset.idx;if(idx===undefined)return;
