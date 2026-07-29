@@ -346,7 +346,7 @@
 
   <script>
     const STORAGE_KEY="amanJournalIntegratedV1";
-    const DEFAULT_SETTINGS={monthlyStart:47.91,dailyTargetPct:0.05,stopPct:0.12,withdrawPct:0.12,monthlyTargetMultiplier:1.60,wallet:0};
+    const DEFAULT_SETTINGS={monthlyStart:47.91,dailyTargetPct:0.05,stopPct:0.22,withdrawPct:0.12,monthlyTargetMultiplier:1.60,wallet:0};
     const demo={};
     const DISCIPLINE_TIER={"Perfect Day":"green","Stopped After 2 Trades":"green","Accepted the Loss":"green","Missed Setup":"orange","Early Entry":"orange","Early Exit":"orange","Forced Trade":"orange","Revenge Trading":"red","Broke Risk Rules":"red","Overtraded":"red"};
     let SETTINGS={...DEFAULT_SETTINGS};let weeklyOverrides={};let monthlyStartOverrides={};let withdrawals={};let currentMonthlyStart=DEFAULT_SETTINGS.monthlyStart;let currentMonthlyKey="";
@@ -370,6 +370,7 @@
     const $=id=>document.getElementById(id);
     function load(){try{const x=localStorage.getItem(STORAGE_KEY);if(!x)return {...demo};const parsed=JSON.parse(x);
         if(parsed&&parsed.entries){SETTINGS={...DEFAULT_SETTINGS,...(parsed.settings||{}),monthlyStart:DEFAULT_SETTINGS.monthlyStart};
+          if(SETTINGS.stopPct===0.12)SETTINGS.stopPct=0.22;
           if(parsed.weeklyOverrides)weeklyOverrides=parsed.weeklyOverrides;
           else if(parsed.weeklyOverride)weeklyOverrides={[parsed.weeklyOverride.weekKey]:parsed.weeklyOverride.value};
           if(parsed.monthlyStartOverrides)monthlyStartOverrides=parsed.monthlyStartOverrides;
