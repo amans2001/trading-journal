@@ -367,10 +367,11 @@
       return running;
     }
     let entries=load();let currentMonth=new Date(2026,6,1);let selected=null;
+    if(window._stopPctMigrated)setTimeout(()=>persist(),0);
     const $=id=>document.getElementById(id);
     function load(){try{const x=localStorage.getItem(STORAGE_KEY);if(!x)return {...demo};const parsed=JSON.parse(x);
         if(parsed&&parsed.entries){SETTINGS={...DEFAULT_SETTINGS,...(parsed.settings||{}),monthlyStart:DEFAULT_SETTINGS.monthlyStart};
-          if(SETTINGS.stopPct===0.12)SETTINGS.stopPct=0.22;
+          if(SETTINGS.stopPct!==0.22){SETTINGS.stopPct=0.22;window._stopPctMigrated=true}
           if(parsed.weeklyOverrides)weeklyOverrides=parsed.weeklyOverrides;
           else if(parsed.weeklyOverride)weeklyOverrides={[parsed.weeklyOverride.weekKey]:parsed.weeklyOverride.value};
           if(parsed.monthlyStartOverrides)monthlyStartOverrides=parsed.monthlyStartOverrides;
