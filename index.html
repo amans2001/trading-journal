@@ -217,11 +217,11 @@
             <input type="file" id="importFile" accept="application/json" style="display:none">
           </div>
           <div class="recovery-section">
-            <div class="recovery-label">🎯 RECOVERY STATUS</div>
+            <div class="recovery-label" title="Scoped to this calendar month only — resets each month, independent of the 30 Trade Challenge sprint.">🎯 RECOVERY STATUS</div>
             <div class="recovery-grid">
               <div class="recovery-box"><div class="recovery-box-label">TO BREAKEVEN</div><div class="recovery-box-value" id="toBreakeven">$0.00</div></div>
               <div class="recovery-box"><div class="recovery-box-label">EXPECTED WIN</div><div class="recovery-box-value" id="expectedWinDisplay">$0.00</div></div>
-              <div class="recovery-box"><div class="recovery-box-label">DAYS NEEDED</div><div class="recovery-box-value" id="daysNeeded">0</div></div>
+              <div class="recovery-box"><div class="recovery-box-label">DAYS NEEDED (MONTH)</div><div class="recovery-box-value" id="daysNeeded">0</div></div>
             </div>
             <div class="recovery-status" id="recoveryStatus">🟢 Protected</div>
           </div>
@@ -291,11 +291,11 @@
 
         <div class="challenge-side">
           <section class="panel tilt">
-            <div class="recovery-label">🎯 SPRINT OUTLOOK</div>
+            <div class="recovery-label" title="Scoped to this 30-trade sprint only — carries across calendar months until 30 trades are logged or a new sprint is started. Independent of the Calendar's monthly Recovery Status.">🎯 SPRINT OUTLOOK</div>
             <div class="recovery-grid">
               <div class="recovery-box"><div class="recovery-box-label">TO BREAKEVEN</div><div class="recovery-box-value" id="chToBreakeven">$0.00</div></div>
               <div class="recovery-box"><div class="recovery-box-label">EXPECTED WIN</div><div class="recovery-box-value" id="chExpectedWin">$0.00</div></div>
-              <div class="recovery-box"><div class="recovery-box-label">WINS NEEDED</div><div class="recovery-box-value" id="chWinsNeeded">0</div></div>
+              <div class="recovery-box"><div class="recovery-box-label">WINS NEEDED (SPRINT)</div><div class="recovery-box-value" id="chWinsNeeded">0</div></div>
             </div>
             <div class="recovery-status" id="chStatusLine">🟢 Protected</div>
           </section>
@@ -429,10 +429,10 @@
       $("expectedWinDisplay").textContent=money(expectedWin);
       $("daysNeeded").textContent=daysNeeded;
       let status;
-      if(daysNeeded===0)status="🟢 Protected";
-      else if(daysNeeded===1)status=`🟡 ${daysNeeded} Win to Recover`;
-      else if(daysNeeded===2)status=`🟠 ${daysNeeded} Wins to Recover`;
-      else status=`🔴 ${daysNeeded} Wins to Recover`;
+      if(daysNeeded===0)status="🟢 Protected this month";
+      else if(daysNeeded===1)status=`🟡 ${daysNeeded} Win to Recover This Month`;
+      else if(daysNeeded===2)status=`🟠 ${daysNeeded} Wins to Recover This Month`;
+      else status=`🔴 ${daysNeeded} Wins to Recover This Month`;
       $("recoveryStatus").textContent=status;
     }
     function renderTilt(weightedAvg,count){
@@ -822,8 +822,8 @@
       winsNeededBox.classList.remove("goal-box");
       let statusLine,tierCls;
       if(remaining<=0){statusLine="🏁 Sprint Complete";tierCls="wn-green"}
-      else if(winsNeeded===0){statusLine="🟢 Protected";tierCls="wn-green"}
-      else{statusLine=`🎯 Goal: ${winsNeeded}${winsNeeded>=remaining?"+":""} More Win${winsNeeded===1?"":"s"}`;tierCls="wn-goal";winsNeededBox.classList.add("goal-box")}
+      else if(winsNeeded===0){statusLine="🟢 Protected this sprint";tierCls="wn-green"}
+      else{statusLine=`🎯 Goal: ${winsNeeded}${winsNeeded>=remaining?"+":""} More Win${winsNeeded===1?"":"s"} This Sprint`;tierCls="wn-goal";winsNeededBox.classList.add("goal-box")}
       winsNeededEl.classList.add(tierCls);
       $("chStatusLine").textContent=statusLine;
 
