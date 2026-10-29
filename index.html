@@ -366,7 +366,7 @@
         running+=monthPnl-monthWithdrawTotal(`${wy}-${wm}`);wm++;if(wm>11){wm=0;wy++}}
       return running;
     }
-    let entries=load();let currentMonth=new Date(2026,6,1);let selected=null;
+    let entries=load();let currentMonth=(()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1)})();let selected=null;
     if(window._stopPctMigrated)setTimeout(()=>persist(),0);
     const $=id=>document.getElementById(id);
     function load(){try{const x=localStorage.getItem(STORAGE_KEY);if(!x)return {...demo};const parsed=JSON.parse(x);
