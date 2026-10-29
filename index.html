@@ -50,7 +50,7 @@
     .day-card.loss{background:linear-gradient(145deg,rgba(83,11,28,.82),var(--red-bg));border-color:rgba(255,73,103,.62)}
     .day-card.breakeven{background:linear-gradient(145deg,rgba(8,50,75,.82),var(--blue-bg));border-color:rgba(52,201,255,.55)}
     .day-number{position:absolute;right:8px;top:7px;z-index:3;font-size:12px;font-weight:600;color:rgba(245,248,251,.8);text-shadow:0 1px 3px rgba(0,0,0,.8);opacity:1}.discipline{position:absolute;left:7px;top:6px;width:18px;height:18px;display:grid;place-items:center;border:1px solid currentColor;border-radius:5px;font-size:9px}.discipline.green{color:#39e67c}.discipline.orange{color:#ff9d3d}.discipline.red{color:#ff4967}
-    .day-content{height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-top:10px;gap:6px}.pnl{font-size:18px;font-weight:800}.profit .pnl{color:var(--green)}.loss .pnl{color:var(--red)}.breakeven .pnl{color:var(--blue)}.day-meta{font-size:10px;font-weight:500;line-height:1.6;color:#c3d2dd;opacity:.85}
+    .day-content{height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-top:10px;gap:6px}.pnl{font-size:18px;font-weight:800}.profit .pnl{color:var(--green)}.loss .pnl{color:var(--red)}.breakeven .pnl{color:var(--blue)}.day-meta{font-size:10px;font-weight:500;line-height:1.6;color:#c3d2dd;opacity:.85}.day-meta .day-pct{font-weight:700}.day-meta .day-pct.positive{color:var(--green)}.day-meta .day-pct.negative{color:var(--red)}.wins-missing{position:absolute;left:7px;bottom:6px;z-index:3;padding:1px 5px;border:1px dashed #ffc94d;border-radius:5px;font-size:9px;font-weight:800;color:#ffc94d;opacity:.9}
     .week-col{grid-column:2;grid-row:1/-1;display:grid;grid-template-rows:repeat(6,120px);row-gap:8px}.week-card{border:1px solid var(--border);border-radius:11px;background:#0a1620;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:6px}
     .week-label{font-size:10px;color:#87b6d7;font-weight:700;letter-spacing:.4px}.week-total{font-size:22px;font-weight:800}.week-pct{font-size:11px;font-weight:700;color:#8ba3b4}.week-pct.positive{color:var(--green)}.week-pct.negative{color:var(--red)}.week-days{padding:4px 11px;border-radius:999px;background:#132437;font-size:10px;font-weight:500;color:#c7d6df}
     .tilt{padding:12px}.section-title{
@@ -398,7 +398,10 @@
         if(d <= firstWeekEnd) wi = 0;
         else wi = 1 + Math.floor((d - firstWeekEnd - 1) / 7);
         b.dataset.date=k;b.innerHTML=`<span class="day-number">${d}</span><div class="day-content"></div>`;
-        if(e){const p=Number(e.pnl||0),t=Number(e.trades||0),w=Number(e.wins||0),wr=t?w/t*100:0;b.classList.add(p>0?"profit":p<0?"loss":"breakeven");
+        if(e){const p=Number(e.pnl||0),t=Number(e.trades||0),w=Number(e.wins||0);
+          const priorWd=(withdrawals[currentMonthlyKey]||[]).filter(x=>x.date&&x.date<k).reduce((s,x)=>s+Number(x.amount||0),0);
+          const dayStart=currentMonthlyStart+mp-priorWd,dayPct=dayStart>0?p/dayStart*100:0;
+          const winsMissing=t>0&&w===0&&p>0;b.classList.add(p>0?"profit":p<0?"loss":"breakeven");
           const pnlScore=p>0?1:p<0?-1:0;const tier=DISCIPLINE_TIER[e.discipline];let dayScore=pnlScore;
           const bigLossThreshold=currentMonthlyStart*SETTINGS.stopPct;
           const isHugeLoss=p<0&&Math.abs(p)>=bigLossThreshold;
@@ -406,7 +409,8 @@
             const badgeTitle=e.discipline+(isHugeLoss?" — loss too large to count as a good day, regardless of tag":"");
             b.insertAdjacentHTML("beforeend",`<span class="discipline ${tier}" title="${badgeTitle}">${tier==="green"?"✓":tier==="orange"?"●":"✕"}</span>`)}
           dayScores.push({score:dayScore,weight:Math.abs(p)});
-          b.querySelector(".day-content").innerHTML=`<div class="pnl">${money(p)}</div><div class="day-meta">${t} ${t===1?"trade":"trades"}<br>${wr.toFixed(1)}%</div>`;
+          b.querySelector(".day-content").innerHTML=`<div class="pnl">${money(p)}</div><div class="day-meta">${t} ${t===1?"trade":"trades"}<br><span class="day-pct ${dayPct>0?"positive":dayPct<0?"negative":""}">${dayPct>0?"+":""}${dayPct.toFixed(1)}%</span></div>`;
+          if(winsMissing)b.insertAdjacentHTML("beforeend",`<span class="wins-missing" title="Winning trades not filled in — edit this day so your win rate stays accurate">W?</span>`);
           mp+=p;md++;mt+=t;mw+=w;weeks[wi].pnl+=p;weeks[wi].days++;weeks[wi].trades+=t;weeks[wi].wins+=w;if(e.discipline)weeks[wi].discipline.push(e.discipline)}
         b.addEventListener("click",()=>openDialog(k));$("calendarGrid").appendChild(b)}
       $("monthPnl").textContent=money(mp);$("monthDays").textContent=`${md} ${md===1?"day":"days"}`;
