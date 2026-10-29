@@ -481,7 +481,7 @@
     let currentWeeklyKey=null;
     function renderDashboard(monthPnl,trades,wins,weeks,y,m){
       const current=currentMonthlyStart+monthPnl-monthWithdrawTotal(currentMonthlyKey);
-      const winrate=trades?wins/trades*100:0;const monthPct=currentMonthlyStart?monthPnl/currentMonthlyStart*100:0;
+      const _pre=`${y}-${String(m+1).padStart(2,"0")}-`;let winDays=0,lossDays=0;Object.keys(entries).forEach(k=>{if(!k.startsWith(_pre))return;const v=Number(entries[k].pnl||0);if(v>0)winDays++;else if(v<0)lossDays++});const winrate=(winDays+lossDays)?winDays/(winDays+lossDays)*100:0;const monthPct=currentMonthlyStart?monthPnl/currentMonthlyStart*100:0;
       let activeWeekIdx=-1;
       const today=new Date();
       if(y===today.getFullYear()&&m===today.getMonth()){
